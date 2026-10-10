@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In — CampusFind{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-header">
+    <div class="brand-icon" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem;">
+      🔐
+    </div>
+    <h1 class="auth-title">Welcome Back</h1>
+    <p class="auth-subtitle">Sign in to your campus account to manage reports and track AI matches.</p>
+  </div>
+
+  <div class="form-card">
+    <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}" class="form-stack" novalidate id="loginForm">
+      {{ form.hidden_tag() }}
+
+      <div class="form-group">
+        <label for="{{ form.username_or_email.id }}" class="form-label">Username or Campus Email</label>
+        {{ form.username_or_email(class="form-control" + (" is-invalid" if form.username_or_email.errors else ""), placeholder="student_id or user@campus.edu", autofocus=True) }}
+        {% for error in form.username_or_email.errors %}
+          <div class="form-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.password.id }}" class="form-label">Password</label>
+        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="••••••••") }}
+        {% for error in form.password.errors %}
+          <div class="form-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <label class="checkbox-label" for="{{ form.remember_me.id }}">
+          {{ form.remember_me() }}
+          <span>Remember me</span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="loginSubmitBtn">
+        Sign In to CampusFind
+      </button>
+    </form>
+  </div>
+
+  <div style="text-align: center; margin-top: 1.75rem; font-size: 0.92rem; color: var(--text-muted);">
+    Don't have an account? 
+    <a href="{{ url_for('auth.register') }}" style="color: var(--primary); font-weight: 600;" id="toRegisterLink">
+      Create student account &rarr;
+    </a>
+  </div>
+</div>
+{% endblock %}

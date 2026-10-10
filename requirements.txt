@@ -1,0 +1,33 @@
+# CampusFind - Application Dependencies
+# Python 3.11+ compatible
+
+# Core Web Framework
+Flask>=3.0.0,<4.0.0
+Flask-SQLAlchemy>=3.1.0,<4.0.0
+Flask-Login>=0.6.3,<1.0.0
+Flask-WTF>=1.2.0,<2.0.0
+WTForms>=3.1.0,<4.0.0
+email-validator>=2.1.0,<3.0.0
+python-dotenv>=1.0.0,<2.0.0
+
+# Database & Cloud MySQL (Aiven)
+SQLAlchemy>=2.0.0,<3.0.0
+PyMySQL>=1.1.0,<2.0.0
+cryptography>=42.0.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# AI / OpenCLIP Image Embedding & Similarity
+torch>=2.0.0
+torchvision>=0.15.0
+open-clip-torch>=2.24.0
+
+# Production WSGI Servers
+# Use gunicorn in Linux/Docker containers; waitress in Windows environments
+gunicorn>=22.0.0; sys_platform != "win32"
+waitress>=3.0.0; sys_platform == "win32"
+
+# Testing & Code Quality
+pytest>=8.0.0
+pytest-mock>=3.14.0

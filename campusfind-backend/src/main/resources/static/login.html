@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — CampusFind AI</title>
+  <meta name="description" content="Sign in to your campus account to manage reports and track OpenCLIP visual AI matches.">
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="nav-brand" id="navBrandLink">
+        <div class="brand-icon"><span>🔍</span></div>
+        <span>CampusFind</span>
+        <span class="brand-badge">AI Core</span>
+      </a>
+
+      <button class="mobile-toggle" id="mobileNavToggle" aria-label="Toggle navigation">☰</button>
+
+      <ul class="nav-links">
+        <li><a href="browse.html" class="nav-link" id="navBrowseLink">📂 Browse Items</a></li>
+        <li><a href="create-report.html?type=LOST" class="nav-link" id="navReportLostLink">📢 Report Lost</a></li>
+        <li><a href="create-report.html?type=FOUND" class="nav-link" id="navReportFoundLink">✨ Report Found</a></li>
+        <li><a href="about.html" class="nav-link" id="navAboutLink">💡 How AI Works</a></li>
+      </ul>
+
+      <div class="nav-actions" id="navActions"></div>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="main-content">
+    <div class="container">
+      <div class="flash-container" id="flashNotificationArea"></div>
+
+      <div class="auth-wrapper" style="max-width: 480px; margin: 2rem auto;">
+        <div class="auth-header">
+          <div class="brand-icon" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; background: var(--primary-gradient); border-radius: var(--radius-md);">
+            <span>🔍</span>
+          </div>
+          <h1 class="auth-title">Welcome Back</h1>
+          <p class="auth-subtitle">Sign in to your campus account to manage reports and track AI matches.</p>
+        </div>
+
+        <div class="form-card">
+          <form class="form-stack" id="loginForm">
+            <div class="form-group">
+              <label for="loginEmail" class="form-label">Campus Email</label>
+              <input type="email" id="loginEmail" class="form-control" placeholder="user@campus.edu" required autofocus autocomplete="username">
+            </div>
+
+            <div class="form-group">
+              <label for="loginPassword" class="form-label">Password</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                <button type="button" class="btn-toggle-password" id="toggleLoginPassword" aria-label="Show password" title="Show password" data-target="loginPassword">
+                  <svg class="eye-icon eye-icon-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg class="eye-icon eye-icon-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+                    <line x1="2" y1="2" x2="22" y2="22"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div id="loginFeedback" style="display: none; padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1rem; font-size: 0.85rem;"></div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="loginSubmitBtn">
+              Sign In to CampusFind
+            </button>
+          </form>
+        </div>
+
+        <div style="text-align: center; margin-top: 1.75rem; font-size: 0.92rem; color: var(--text-muted);">
+          Don't have an account? 
+          <a href="register.html" style="color: var(--primary); font-weight: 600;" id="toRegisterLink">
+            Create student account &rarr;
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="nav-brand" style="margin-bottom: 0.85rem;">
+            <div class="brand-icon"><span>🔍</span></div>
+            <span>CampusFind</span>
+          </div>
+          <p style="max-width: 340px; line-height: 1.5; color: var(--text-dim);">
+            Intelligent campus lost & found management system featuring OpenCLIP vision transformers for automated image similarity matching.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Navigation</div>
+          <ul class="footer-links">
+            <li><a href="browse.html">Browse Catalog</a></li>
+            <li><a href="create-report.html?type=LOST">Report Lost Item</a></li>
+            <li><a href="create-report.html?type=FOUND">Report Found Item</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <ul class="footer-links">
+            <li><a href="about.html">OpenCLIP Architecture</a></li>
+            <li><a href="/api/v1/health" target="_blank">Backend Health API</a></li>
+            <li><a href="login.html">Staff & Student Portal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Campus Security</div>
+          <ul class="footer-links">
+            <li><span style="color: var(--text-dim);">Safety Escort: ext 2200</span></li>
+            <li><span style="color: var(--text-dim);">Central Security Desk: Hall B</span></li>
+            <li><span style="color: var(--text-dim);">Emergency: 911</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 CampusFind AI. Built with Spring Boot & OpenCLIP.</div>
+        <div>ViT-B-32 Neural Embeddings active</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // If already logged in, redirect
+      if (auth.isAuthenticated()) {
+        window.location.href = 'browse.html';
+        return;
+      }
+
+      const form = document.getElementById('loginForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const submitBtn = document.getElementById('loginSubmitBtn');
+        const feedback = document.getElementById('loginFeedback');
+
+        feedback.style.display = 'none';
+
+        if (!email || !password) {
+          feedback.style.display = 'block';
+          feedback.style.background = 'rgba(239, 68, 68, 0.15)';
+          feedback.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+          feedback.style.color = '#fca5a5';
+          feedback.textContent = 'Please enter both email and password.';
+          return;
+        }
+
+        try {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Verifying credentials...';
+
+          const user = await auth.login(email, password);
+          app.showNotification('success', `Welcome back, ${user.fullName || user.email}!`);
+
+          const params = new URLSearchParams(window.location.search);
+          const redirect = params.get('redirect') || 'browse.html';
+
+          setTimeout(() => {
+            window.location.href = redirect;
+          }, 400);
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In to CampusFind';
+          feedback.style.display = 'block';
+          feedback.style.background = 'rgba(239, 68, 68, 0.15)';
+          feedback.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+          feedback.style.color = '#fca5a5';
+          feedback.textContent = err.message || 'Invalid campus email or password.';
+        }
+      });
+
+      // Clear feedback when user edits fields
+      ['loginEmail', 'loginPassword'].forEach(id => {
+        const inputEl = document.getElementById(id);
+        if (inputEl) {
+          inputEl.addEventListener('input', () => {
+            feedback.style.display = 'none';
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

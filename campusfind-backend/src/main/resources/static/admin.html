@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrator Dashboard — CampusFind AI</title>
+  <meta name="description" content="CampusFind administrator portal for monitoring campus reports and managing users.">
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="nav-brand" id="navBrandLink">
+        <div class="brand-icon"><span>🔍</span></div>
+        <span>CampusFind</span>
+        <span class="brand-badge">Admin</span>
+      </a>
+
+      <button class="mobile-toggle" id="mobileNavToggle" aria-label="Toggle navigation">☰</button>
+
+      <ul class="nav-links">
+        <li><a href="browse.html" class="nav-link" id="navBrowseLink">📂 Browse Items</a></li>
+        <li><a href="create-report.html?type=LOST" class="nav-link" id="navReportLostLink">📢 Report Lost</a></li>
+        <li><a href="create-report.html?type=FOUND" class="nav-link" id="navReportFoundLink">✨ Report Found</a></li>
+        <li><a href="about.html" class="nav-link" id="navAboutLink">💡 How AI Works</a></li>
+      </ul>
+
+      <div class="nav-actions" id="navActions"></div>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="main-content">
+    <div class="container">
+      <div class="flash-container" id="flashNotificationArea"></div>
+
+      <!-- Access Denied Card (Default until verified) -->
+      <div id="adminAccessDenied" class="card" style="display: none; text-align: center; padding: 3rem 1.5rem; max-width: 600px; margin: 2rem auto;">
+        <div style="font-size: 3rem; margin-bottom: 0.75rem;">🛡️</div>
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">Administrator Access Required</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+          This area is restricted to campus security administrators. Please sign in with administrator credentials.
+        </p>
+        <a href="login.html" class="btn btn-primary">Sign In as Administrator</a>
+      </div>
+
+      <!-- Admin Portal Content -->
+      <div id="adminPortalContent" style="display: none;">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">
+              <span>⚙️</span> Campus Administration Portal
+            </h1>
+            <p class="section-desc">Inspect all student reports, monitor AI index operations, and audit user directory.</p>
+          </div>
+        </div>
+
+        <!-- Metrics Overview -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
+          <div class="card" style="padding: 1.25rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 800; color: #fff;" id="adminTotalUsers">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Registered Accounts</div>
+          </div>
+          <div class="card" style="padding: 1.25rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 800; color: #a78bfa;" id="adminTotalReports">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Total Campus Reports</div>
+          </div>
+          <div class="card" style="padding: 1.25rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 800; color: #34d399;" id="adminResolvedReports">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Resolved Cases</div>
+          </div>
+        </div>
+
+        <!-- Tab Controls -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+          <button type="button" class="btn btn-sm btn-primary" id="tabReportsBtn">Campus Reports</button>
+          <button type="button" class="btn btn-sm btn-outline" id="tabUsersBtn">User Directory</button>
+        </div>
+
+        <!-- Section 1: Reports Table -->
+        <div id="sectionReports">
+          <div class="card" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-dim); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                  <th style="padding: 1rem;">ID</th>
+                  <th style="padding: 1rem;">Title</th>
+                  <th style="padding: 1rem;">Type</th>
+                  <th style="padding: 1rem;">Category</th>
+                  <th style="padding: 1rem;">Reporter</th>
+                  <th style="padding: 1rem;">Status</th>
+                  <th style="padding: 1rem; text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminReportsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 2: Users Table -->
+        <div id="sectionUsers" style="display: none;">
+          <div class="card" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-dim); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">
+                  <th style="padding: 1rem;">ID</th>
+                  <th style="padding: 1rem;">Full Name</th>
+                  <th style="padding: 1rem;">Campus Email</th>
+                  <th style="padding: 1rem;">Role</th>
+                  <th style="padding: 1rem;">Enrolled Date</th>
+                </tr>
+              </thead>
+              <tbody id="adminUsersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="nav-brand" style="margin-bottom: 0.85rem;">
+            <div class="brand-icon"><span>🔍</span></div>
+            <span>CampusFind</span>
+          </div>
+          <p style="max-width: 340px; line-height: 1.5; color: var(--text-dim);">
+            Intelligent campus lost & found management system featuring OpenCLIP vision transformers for automated image similarity matching.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Navigation</div>
+          <ul class="footer-links">
+            <li><a href="browse.html">Browse Catalog</a></li>
+            <li><a href="create-report.html?type=LOST">Report Lost Item</a></li>
+            <li><a href="create-report.html?type=FOUND">Report Found Item</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <ul class="footer-links">
+            <li><a href="about.html">OpenCLIP Architecture</a></li>
+            <li><a href="/api/v1/health" target="_blank">Backend Health API</a></li>
+            <li><a href="login.html">Staff & Student Portal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Campus Security</div>
+          <ul class="footer-links">
+            <li><span style="color: var(--text-dim);">Safety Escort: ext 2200</span></li>
+            <li><span style="color: var(--text-dim);">Central Security Desk: Hall B</span></li>
+            <li><span style="color: var(--text-dim);">Emergency: 911</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 CampusFind AI. Built with Spring Boot & OpenCLIP.</div>
+        <div>ViT-B-32 Neural Embeddings active</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Enforce admin role
+      if (!auth.isAuthenticated() || !auth.isAdmin()) {
+        document.getElementById('adminAccessDenied').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('adminPortalContent').style.display = 'block';
+
+      // Tab switching
+      const tabReportsBtn = document.getElementById('tabReportsBtn');
+      const tabUsersBtn = document.getElementById('tabUsersBtn');
+      const sectionReports = document.getElementById('sectionReports');
+      const sectionUsers = document.getElementById('sectionUsers');
+
+      tabReportsBtn.addEventListener('click', () => {
+        tabReportsBtn.className = 'btn btn-sm btn-primary';
+        tabUsersBtn.className = 'btn btn-sm btn-outline';
+        sectionReports.style.display = 'block';
+        sectionUsers.style.display = 'none';
+      });
+
+      tabUsersBtn.addEventListener('click', () => {
+        tabUsersBtn.className = 'btn btn-sm btn-primary';
+        tabReportsBtn.className = 'btn btn-sm btn-outline';
+        sectionUsers.style.display = 'block';
+        sectionReports.style.display = 'none';
+      });
+
+      await loadAdminData();
+    });
+
+    async function loadAdminData() {
+      try {
+        const [users, reports] = await Promise.all([
+          api.getAdminUsers(),
+          api.getAdminReports()
+        ]);
+
+        document.getElementById('adminTotalUsers').textContent = users.length;
+        document.getElementById('adminTotalReports').textContent = reports.length;
+        document.getElementById('adminResolvedReports').textContent =
+          reports.filter(r => r.status === 'RESOLVED').length;
+
+        // Render Reports
+        const reportsTbody = document.getElementById('adminReportsTableBody');
+        reportsTbody.innerHTML = '';
+        reports.forEach(r => {
+          const isLost = r.type === 'LOST';
+          const isResolved = r.status === 'RESOLVED';
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid var(--border-subtle)';
+          tr.innerHTML = `
+            <td style="padding: 1rem; color: var(--text-dim);">#${r.id}</td>
+            <td style="padding: 1rem; font-weight: 600; color: #fff;">
+              <a href="detail.html?id=${r.id}" style="color: #fff; text-decoration: underline;">${app.escapeHtml(r.title)}</a>
+            </td>
+            <td style="padding: 1rem;">
+              <span class="badge ${isLost ? 'badge-lost' : 'badge-found'}">${r.type}</span>
+            </td>
+            <td style="padding: 1rem;">${app.escapeHtml(r.category || 'General')}</td>
+            <td style="padding: 1rem; color: var(--text-muted);">${app.escapeHtml(r.reporterEmail || 'N/A')}</td>
+            <td style="padding: 1rem;">
+              <span class="badge ${isResolved ? 'badge-resolved' : 'badge-found'}">${r.status}</span>
+            </td>
+            <td style="padding: 1rem; text-align: right;">
+              <button class="btn btn-sm ${isResolved ? 'btn-secondary' : 'btn-found'}" onclick="adminToggleStatus(${r.id}, '${isResolved ? 'OPEN' : 'RESOLVED'}')">
+                ${isResolved ? 'Reopen' : 'Resolve'}
+              </button>
+              <button class="btn btn-sm btn-danger" onclick="adminDeleteReport(${r.id})">Delete</button>
+            </td>
+          `;
+          reportsTbody.appendChild(tr);
+        });
+
+        // Render Users
+        const usersTbody = document.getElementById('adminUsersTableBody');
+        usersTbody.innerHTML = '';
+        users.forEach(u => {
+          const isAdmin = u.role === 'ROLE_ADMIN';
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid var(--border-subtle)';
+          tr.innerHTML = `
+            <td style="padding: 1rem; color: var(--text-dim);">#${u.id}</td>
+            <td style="padding: 1rem; font-weight: 600; color: #fff;">${app.escapeHtml(u.fullName)}</td>
+            <td style="padding: 1rem; color: var(--text-muted);">${app.escapeHtml(u.email)}</td>
+            <td style="padding: 1rem;">
+              <span class="badge ${isAdmin ? 'badge-lost' : 'badge-found'}">${u.role}</span>
+            </td>
+            <td style="padding: 1rem; color: var(--text-dim);">${app.formatDate(u.createdAt)}</td>
+          `;
+          usersTbody.appendChild(tr);
+        });
+
+      } catch (err) {
+        app.showNotification('danger', err.message || 'Failed to fetch admin data.');
+      }
+    }
+
+    async function adminToggleStatus(id, newStatus) {
+      try {
+        await api.updateReportStatus(id, newStatus);
+        app.showNotification('success', `Report #${id} marked as ${newStatus}.`);
+        await loadAdminData();
+      } catch (err) {
+        app.showNotification('danger', err.message || 'Failed to update status.');
+      }
+    }
+
+    async function adminDeleteReport(id) {
+      if (!confirm(`Are you sure you want to delete Report #${id}?`)) return;
+      try {
+        await api.deleteReport(id);
+        app.showNotification('success', `Report #${id} deleted.`);
+        await loadAdminData();
+      } catch (err) {
+        app.showNotification('danger', err.message || 'Failed to delete report.');
+      }
+    }
+  </script>
+</body>
+</html>

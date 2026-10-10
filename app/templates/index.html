@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}CampusFind — AI Lost & Found{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-pill">
+    <span>✨</span>
+    <span>Next-Generation Campus Recovery System</span>
+  </div>
+  
+  <h1 class="hero-title">
+    Lost Something on Campus?<br>
+    Let <span class="gradient-text">OpenCLIP AI</span> Find It.
+  </h1>
+  
+  <p class="hero-subtitle">
+    CampusFind connects students, faculty, and campus security through neural visual similarity matching. Upload an item photo or browse reported belongings in seconds.
+  </p>
+
+  <div class="hero-actions">
+    <a href="{{ url_for('reports.create', type='lost') }}" class="btn btn-lg btn-lost" id="heroReportLostBtn">
+      <span>💔</span> Report Lost Item
+    </a>
+    <a href="{{ url_for('reports.create', type='found') }}" class="btn btn-lg btn-found" id="heroReportFoundBtn">
+      <span>✨</span> Report Found Item
+    </a>
+    <a href="{{ url_for('reports.index') }}" class="btn btn-lg btn-secondary" id="heroBrowseBtn">
+      <span>🔍</span> Browse Directory
+    </a>
+  </div>
+
+  <!-- Real-time Metrics Counters -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon total">📦</div>
+      <div>
+        <div class="stat-number">{{ total_reports }}</div>
+        <div class="stat-label">Total Reports</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon lost">💔</div>
+      <div>
+        <div class="stat-number">{{ total_lost }}</div>
+        <div class="stat-label">Lost Items</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon found">✨</div>
+      <div>
+        <div class="stat-number">{{ total_found }}</div>
+        <div class="stat-label">Found Items</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon resolved">🤝</div>
+      <div>
+        <div class="stat-number">{{ total_resolved }}</div>
+        <div class="stat-label">Successfully Reunited</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Search & Category Shortcuts -->
+<div class="card" style="margin-bottom: 3.5rem; padding: 2rem;">
+  <form action="{{ url_for('reports.index') }}" method="GET" class="filter-grid" id="landingSearchForm">
+    <div class="form-group" style="grid-column: span 3;">
+      <label class="form-label">Instant Campus Search</label>
+      <input type="text" name="q" class="form-control" placeholder="Search keywords: 'Blue Hydro Flask', 'MacBook Air', 'Keys with red lanyard'..." id="landingSearchInput">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select name="category" class="form-select" id="landingCategorySelect">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+          <option value="{{ cat }}">{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin-top: auto;">
+      <button type="submit" class="btn btn-primary" style="height: 42px; width: 100%;" id="landingSearchSubmit">
+        Search Now
+      </button>
+    </div>
+  </form>
+
+  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.25rem; align-items: center;">
+    <span style="font-size: 0.82rem; color: var(--text-dim); font-weight: 600;">Popular Categories:</span>
+    {% for cat in categories[:7] %}
+      <a href="{{ url_for('reports.index', category=cat) }}" class="badge badge-category" style="cursor: pointer;">
+        {{ cat }}
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Recent Found Items Grid -->
+<section style="margin-bottom: 3.5rem;">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">
+        <span style="color: #34d399;">✨</span> Recently Found Items
+      </h2>
+      <p class="section-desc">Turned in by students and security staff awaiting collection.</p>
+    </div>
+    <a href="{{ url_for('reports.index', type='found') }}" class="btn btn-sm btn-outline">
+      View All Found &rarr;
+    </a>
+  </div>
+
+  {% if recent_found %}
+    <div class="items-grid">
+      {% for item in recent_found %}
+        <a href="{{ url_for('reports.detail', report_id=item.id) }}" class="item-card">
+          <div class="item-thumb-wrapper">
+            {% if item.image_filename %}
+              <img src="{{ url_for('main.serve_upload', filename=item.image_filename) }}" alt="{{ item.title }}" class="item-thumb" loading="lazy">
+            {% else %}
+              <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="Placeholder" class="item-thumb">
+            {% endif %}
+            <div class="item-badges-overlay">
+              <span class="badge badge-found">Found</span>
+              <span class="badge badge-category">{{ item.category }}</span>
+            </div>
+          </div>
+          <div class="item-body">
+            <h3 class="item-title">{{ item.title }}</h3>
+            <p class="item-desc">{{ item.description }}</p>
+            <div class="item-meta">
+              <div class="meta-row">
+                <span class="meta-icon">📍</span>
+                <span>{{ item.location }}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-icon">📅</span>
+                <span>{{ item.date_incident|format_date }}</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+      <p style="color: var(--text-muted); font-size: 1.1rem;">No open found items reported yet.</p>
+      <a href="{{ url_for('reports.create', type='found') }}" class="btn btn-sm btn-found" style="margin-top: 1rem;">
+        Report a Found Item
+      </a>
+    </div>
+  {% endif %}
+</section>
+
+<!-- Recent Lost Items Grid -->
+<section style="margin-bottom: 3.5rem;">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">
+        <span style="color: #fb7185;">💔</span> Recently Lost Items
+      </h2>
+      <p class="section-desc">Items currently missing on campus. Check if you have seen them!</p>
+    </div>
+    <a href="{{ url_for('reports.index', type='lost') }}" class="btn btn-sm btn-outline">
+      View All Lost &rarr;
+    </a>
+  </div>
+
+  {% if recent_lost %}
+    <div class="items-grid">
+      {% for item in recent_lost %}
+        <a href="{{ url_for('reports.detail', report_id=item.id) }}" class="item-card">
+          <div class="item-thumb-wrapper">
+            {% if item.image_filename %}
+              <img src="{{ url_for('main.serve_upload', filename=item.image_filename) }}" alt="{{ item.title }}" class="item-thumb" loading="lazy">
+            {% else %}
+              <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="Placeholder" class="item-thumb">
+            {% endif %}
+            <div class="item-badges-overlay">
+              <span class="badge badge-lost">Lost</span>
+              <span class="badge badge-category">{{ item.category }}</span>
+            </div>
+          </div>
+          <div class="item-body">
+            <h3 class="item-title">{{ item.title }}</h3>
+            <p class="item-desc">{{ item.description }}</p>
+            <div class="item-meta">
+              <div class="meta-row">
+                <span class="meta-icon">📍</span>
+                <span>{{ item.location }}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-icon">📅</span>
+                <span>{{ item.date_incident|format_date }}</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+      <p style="color: var(--text-muted); font-size: 1.1rem;">No active lost items reported.</p>
+      <a href="{{ url_for('reports.create', type='lost') }}" class="btn btn-sm btn-lost" style="margin-top: 1rem;">
+        Report a Lost Item
+      </a>
+    </div>
+  {% endif %}
+</section>
+
+<!-- How AI Matching Works Feature Card -->
+<div class="card" style="background: linear-gradient(135deg, rgba(30, 27, 75, 0.7), rgba(17, 24, 39, 0.9)); border: 1px solid rgba(139, 92, 246, 0.35); padding: 2.5rem;">
+  <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
+    <div style="font-size: 3.5rem;">🧠</div>
+    <div style="flex: 1; min-width: 280px;">
+      <div class="badge badge-ai" style="margin-bottom: 0.75rem;">OpenCLIP Vision Intelligence</div>
+      <h3 style="font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">
+        Multimodal Neural Similarity Matching
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+        Unlike standard text searches, CampusFind embeds uploaded photos using OpenAI OpenCLIP ({{ ai_model_name }}). Whenever a found item is submitted, our cosine similarity engine immediately flags matching lost reports with confidence scores.
+      </p>
+    </div>
+    <div>
+      <a href="{{ url_for('main.about') }}" class="btn btn-primary" id="learnAIButton">
+        Explore Technical Specs &rarr;
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

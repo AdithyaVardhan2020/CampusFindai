@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Lost & Found Items — CampusFind{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">
+      <span>📋</span> Campus Lost & Found Catalog
+    </h1>
+    <p class="section-desc">Search active reports, filter by category or building, and locate your lost items.</p>
+  </div>
+
+  <div style="display: flex; gap: 0.75rem;">
+    <a href="{{ url_for('reports.create', type='lost') }}" class="btn btn-lost" id="catalogReportLostBtn">
+      + Report Lost
+    </a>
+    <a href="{{ url_for('reports.create', type='found') }}" class="btn btn-found" id="catalogReportFoundBtn">
+      + Report Found
+    </a>
+  </div>
+</div>
+
+<!-- Search & Filtering Toolbar -->
+<div class="filter-bar">
+  <form action="{{ url_for('reports.index') }}" method="GET" class="filter-grid" id="reportsFilterForm">
+    <div class="form-group">
+      <label class="form-label" for="filterKeyword">Search Keywords</label>
+      <input type="text" name="q" id="filterKeyword" value="{{ keyword }}" class="form-control" placeholder="Search by title, description, or serial...">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="filterType">Type</label>
+      <select name="type" id="filterType" class="form-select">
+        <option value="">All Types</option>
+        <option value="lost" {% if selected_type == 'lost' %}selected{% endif %}>Lost Items</option>
+        <option value="found" {% if selected_type == 'found' %}selected{% endif %}>Found Items</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="filterCategory">Category</label>
+      <select name="category" id="filterCategory" class="form-select">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+          <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="filterStatus">Status</label>
+      <select name="status" id="filterStatus" class="form-select">
+        <option value="open" {% if selected_status == 'open' %}selected{% endif %}>Open Only</option>
+        <option value="resolved" {% if selected_status == 'resolved' %}selected{% endif %}>Resolved</option>
+        <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All Records</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="margin-top: auto; display: flex; gap: 0.5rem;">
+      <button type="submit" class="btn btn-primary" style="height: 42px;" id="applyFiltersBtn">
+        Filter
+      </button>
+      {% if keyword or selected_type or selected_category or (selected_status and selected_status != 'open') %}
+        <a href="{{ url_for('reports.index') }}" class="btn btn-outline" style="height: 42px;" title="Reset filters">
+          Reset
+        </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Item Cards Grid -->
+{% if reports %}
+  <div class="items-grid">
+    {% for item in reports %}
+      <a href="{{ url_for('reports.detail', report_id=item.id) }}" class="item-card">
+        <div class="item-thumb-wrapper">
+          {% if item.image_filename %}
+            <img src="{{ url_for('main.serve_upload', filename=item.image_filename) }}" alt="{{ item.title }}" class="item-thumb" loading="lazy">
+          {% else %}
+            <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="Placeholder" class="item-thumb">
+          {% endif %}
+          
+          <div class="item-badges-overlay">
+            <div>
+              {% if item.is_lost %}
+                <span class="badge badge-lost">Lost</span>
+              {% else %}
+                <span class="badge badge-found">Found</span>
+              {% endif %}
+              
+              {% if item.status == 'resolved' %}
+                <span class="badge badge-resolved">Resolved</span>
+              {% endif %}
+            </div>
+
+            <span class="badge badge-category">{{ item.category }}</span>
+          </div>
+        </div>
+
+        <div class="item-body">
+          <h3 class="item-title">{{ item.title }}</h3>
+          <p class="item-desc">{{ item.description }}</p>
+
+          <div class="item-meta">
+            <div class="meta-row">
+              <span class="meta-icon">📍</span>
+              <span>{{ item.location }}</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-icon">📅</span>
+              <span>{{ item.date_incident|format_date }}</span>
+            </div>
+            {% if item.has_embedding %}
+              <div class="meta-row" style="color: #c084fc;">
+                <span class="meta-icon">🧠</span>
+                <span style="font-weight: 600;">AI Embedding Active</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination Nav -->
+  {% if pagination and pagination.pages > 1 %}
+    <nav class="pagination" aria-label="Page navigation">
+      {% if pagination.has_prev %}
+        <a href="{{ url_for('reports.index', page=pagination.prev_num, q=keyword, type=selected_type, category=selected_category, status=selected_status) }}" class="page-link">&laquo; Prev</a>
+      {% endif %}
+
+      {% for p in pagination.iter_pages(left_edge=2, left_current=2, right_current=2, right_edge=2) %}
+        {% if p %}
+          {% if p == pagination.page %}
+            <span class="page-link active">{{ p }}</span>
+          {% else %}
+            <a href="{{ url_for('reports.index', page=p, q=keyword, type=selected_type, category=selected_category, status=selected_status) }}" class="page-link">{{ p }}</a>
+          {% endif %}
+        {% else %}
+          <span style="color: var(--text-dim); padding: 0 0.25rem;">...</span>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+        <a href="{{ url_for('reports.index', page=pagination.next_num, q=keyword, type=selected_type, category=selected_category, status=selected_status) }}" class="page-link">Next &raquo;</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+
+{% else %}
+  <div class="card" style="text-align: center; padding: 4rem 1.5rem;">
+    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+    <h3 style="font-size: 1.35rem; color: #fff; margin-bottom: 0.5rem;">No matching items found</h3>
+    <p style="color: var(--text-muted); max-width: 480px; margin: 0 auto 1.5rem;">
+      We couldn't find any reports matching your current search criteria. Try modifying your keywords or resetting filters.
+    </p>
+    <a href="{{ url_for('reports.index') }}" class="btn btn-secondary">
+      Clear Filters
+    </a>
+  </div>
+{% endif %}
+{% endblock %}

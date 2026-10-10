@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard — CampusFind{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">
+      <span>👤</span> Welcome back, {{ current_user.full_name }}
+    </h1>
+    <p class="section-desc">Manage your campus lost & found submissions and review AI visual matches.</p>
+  </div>
+
+  <div style="display: flex; gap: 0.75rem;">
+    <a href="{{ url_for('reports.create', type='lost') }}" class="btn btn-lost" id="dashReportLostBtn">
+      + Report Lost Item
+    </a>
+    <a href="{{ url_for('reports.create', type='found') }}" class="btn btn-found" id="dashReportFoundBtn">
+      + Report Found Item
+    </a>
+  </div>
+</div>
+
+<!-- Dashboard Metric Cards -->
+<div class="stats-grid" style="margin-bottom: 2.5rem;">
+  <div class="stat-card">
+    <div class="stat-icon total">📦</div>
+    <div>
+      <div class="stat-number">{{ my_reports|length }}</div>
+      <div class="stat-label">My Submissions</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon lost">💔</div>
+    <div>
+      <div class="stat-number">{{ my_lost|length }}</div>
+      <div class="stat-label">Items Lost</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon found">✨</div>
+    <div>
+      <div class="stat-number">{{ my_found|length }}</div>
+      <div class="stat-label">Items Found</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon resolved">🤝</div>
+    <div>
+      <div class="stat-number">{{ my_resolved|length }}</div>
+      <div class="stat-label">Resolved</div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Matching Notifications Section -->
+{% if matches_by_report %}
+  <div class="card" style="margin-bottom: 2.5rem; border-color: rgba(139, 92, 246, 0.4); background: linear-gradient(135deg, rgba(30, 27, 75, 0.6), rgba(17, 24, 39, 0.8));">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+      <h2 style="font-size: 1.25rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+        <span>⚡</span> AI Match Alerts for Your Items
+      </h2>
+      <span class="badge badge-ai">Visual Similarity Match</span>
+    </div>
+
+    {% for report_id, data in matches_by_report.items() %}
+      <div style="margin-bottom: 1.25rem;">
+        <div style="font-size: 0.95rem; font-weight: 700; color: #c084fc; margin-bottom: 0.5rem;">
+          Matches for your report: "{{ data.report.title }}" ({{ data.report.report_type|upper }})
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          {% for match in data.matches %}
+            {% set candidate = match.report %}
+            <div class="ai-match-card" style="margin-bottom: 0;">
+              {% if candidate.image_filename %}
+                <img src="{{ url_for('main.serve_upload', filename=candidate.image_filename) }}" alt="{{ candidate.title }}" class="ai-match-thumb">
+              {% else %}
+                <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="Placeholder" class="ai-match-thumb">
+              {% endif %}
+
+              <div>
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.25rem;">
+                  <span class="badge {% if candidate.is_lost %}badge-lost{% else %}badge-found{% endif %}">
+                    {{ candidate.report_type|upper }}
+                  </span>
+                  <span class="badge badge-category">{{ candidate.category }}</span>
+                  <span style="font-size: 0.8rem; color: var(--text-dim);">📍 {{ candidate.location }}</span>
+                </div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 0.2rem;">
+                  {{ candidate.title }}
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
+                  {{ candidate.description }}
+                </p>
+              </div>
+
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+                <div class="ai-score-pill">
+                  <span class="ai-score-pct">{{ match.percentage }}%</span>
+                  <span class="ai-score-label">Match</span>
+                </div>
+                <a href="{{ url_for('reports.detail', report_id=candidate.id) }}" class="btn btn-sm btn-primary">
+                  Review
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- Tabs Nav -->
+<div class="tabs-nav">
+  <button type="button" class="tab-btn active" data-target="tabAllReports" id="tabBtnAll">
+    All Reports ({{ my_reports|length }})
+  </button>
+  <button type="button" class="tab-btn" data-target="tabLostReports" id="tabBtnLost">
+    Lost Items ({{ my_lost|length }})
+  </button>
+  <button type="button" class="tab-btn" data-target="tabFoundReports" id="tabBtnFound">
+    Found Items ({{ my_found|length }})
+  </button>
+  <button type="button" class="tab-btn" data-target="tabResolvedReports" id="tabBtnResolved">
+    Resolved ({{ my_resolved|length }})
+  </button>
+</div>
+
+<!-- Tab: All Reports -->
+<div class="tab-pane" id="tabAllReports">
+  {% if my_reports %}
+    <div class="card" style="padding: 0; overflow-x: auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in my_reports %}
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  {% if r.image_filename %}
+                    <img src="{{ url_for('main.serve_upload', filename=r.image_filename) }}" alt="" style="width: 44px; height: 44px; border-radius: var(--radius-sm); object-fit: cover;">
+                  {% else %}
+                    <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: #1e293b; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                      📦
+                    </div>
+                  {% endif %}
+                  <div>
+                    <a href="{{ url_for('reports.detail', report_id=r.id) }}" style="font-weight: 700; color: #fff;">
+                      {{ r.title }}
+                    </a>
+                    {% if r.has_embedding %}
+                      <div style="font-size: 0.75rem; color: #c084fc;">🧠 AI Indexed</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+              <td>
+                {% if r.is_lost %}
+                  <span class="badge badge-lost">Lost</span>
+                {% else %}
+                  <span class="badge badge-found">Found</span>
+                {% endif %}
+              </td>
+              <td><span class="badge badge-category">{{ r.category }}</span></td>
+              <td>📍 {{ r.location }}</td>
+              <td>📅 {{ r.date_incident|format_date }}</td>
+              <td>
+                {% if r.status == 'resolved' %}
+                  <span class="badge badge-resolved">Resolved</span>
+                {% else %}
+                  <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">Open</span>
+                {% endif %}
+              </td>
+              <td>
+                <div style="display: flex; gap: 0.4rem;">
+                  <a href="{{ url_for('reports.detail', report_id=r.id) }}" class="btn btn-sm btn-outline" title="View details">
+                    👁️
+                  </a>
+                  <a href="{{ url_for('reports.edit', report_id=r.id) }}" class="btn btn-sm btn-secondary" title="Edit report">
+                    ✏️
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+      <p style="color: var(--text-muted); font-size: 1.05rem;">You haven't reported any lost or found items yet.</p>
+      <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.25rem;">
+        <a href="{{ url_for('reports.create', type='lost') }}" class="btn btn-lost">Report Lost Item</a>
+        <a href="{{ url_for('reports.create', type='found') }}" class="btn btn-found">Report Found Item</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Tab: Lost Reports -->
+<div class="tab-pane" id="tabLostReports" style="display: none;">
+  {% if my_lost %}
+    <div class="items-grid">
+      {% for r in my_lost %}
+        <a href="{{ url_for('reports.detail', report_id=r.id) }}" class="item-card">
+          <div class="item-body">
+            <h3 class="item-title">{{ r.title }}</h3>
+            <p class="item-desc">{{ r.description }}</p>
+            <div class="item-meta">
+              <div class="meta-row"><span>📍 {{ r.location }}</span></div>
+              <div class="meta-row"><span>📅 {{ r.date_incident|format_date }}</span></div>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 2.5rem;">
+      <p style="color: var(--text-muted);">No lost item reports.</p>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Tab: Found Reports -->
+<div class="tab-pane" id="tabFoundReports" style="display: none;">
+  {% if my_found %}
+    <div class="items-grid">
+      {% for r in my_found %}
+        <a href="{{ url_for('reports.detail', report_id=r.id) }}" class="item-card">
+          <div class="item-body">
+            <h3 class="item-title">{{ r.title }}</h3>
+            <p class="item-desc">{{ r.description }}</p>
+            <div class="item-meta">
+              <div class="meta-row"><span>📍 {{ r.location }}</span></div>
+              <div class="meta-row"><span>📅 {{ r.date_incident|format_date }}</span></div>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 2.5rem;">
+      <p style="color: var(--text-muted);">No found item reports.</p>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Tab: Resolved Reports -->
+<div class="tab-pane" id="tabResolvedReports" style="display: none;">
+  {% if my_resolved %}
+    <div class="items-grid">
+      {% for r in my_resolved %}
+        <a href="{{ url_for('reports.detail', report_id=r.id) }}" class="item-card">
+          <div class="item-body">
+            <h3 class="item-title">{{ r.title }}</h3>
+            <span class="badge badge-resolved" style="margin-bottom: 0.5rem;">Resolved</span>
+            <p class="item-desc">{{ r.description }}</p>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 2.5rem;">
+      <p style="color: var(--text-muted);">No resolved items yet.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

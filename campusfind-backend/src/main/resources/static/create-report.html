@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Report — CampusFind AI</title>
+  <meta name="description" content="Report a lost or found item with OpenCLIP image embedding extraction.">
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="nav-brand" id="navBrandLink">
+        <div class="brand-icon"><span>🔍</span></div>
+        <span>CampusFind</span>
+        <span class="brand-badge">AI Core</span>
+      </a>
+
+      <button class="mobile-toggle" id="mobileNavToggle" aria-label="Toggle navigation">☰</button>
+
+      <ul class="nav-links">
+        <li><a href="browse.html" class="nav-link" id="navBrowseLink">📂 Browse Items</a></li>
+        <li><a href="create-report.html?type=LOST" class="nav-link" id="navReportLostLink">📢 Report Lost</a></li>
+        <li><a href="create-report.html?type=FOUND" class="nav-link" id="navReportFoundLink">✨ Report Found</a></li>
+        <li><a href="about.html" class="nav-link" id="navAboutLink">💡 How AI Works</a></li>
+      </ul>
+
+      <div class="nav-actions" id="navActions"></div>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="main-content">
+    <div class="container" style="max-width: 760px; margin: 0 auto;">
+      <div class="flash-container" id="flashNotificationArea"></div>
+
+      <div style="margin-bottom: 2rem;">
+        <a href="browse.html" style="color: var(--text-muted); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 0.75rem;">
+          &larr; Back to Catalog
+        </a>
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: #fff; letter-spacing: -0.02em;">
+          Submit a Lost or Found Report
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Provide accurate details and upload an image to allow our OpenCLIP neural network to match candidates automatically.
+        </p>
+      </div>
+
+      <div class="form-card">
+        <form class="form-stack" id="createReportForm">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+            <div class="form-group">
+              <label for="reportType" class="form-label">Report Type *</label>
+              <select id="reportType" class="form-select" required>
+                <option value="LOST">Lost Item (I lost something)</option>
+                <option value="FOUND">Found Item (I found something)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="reportCategory" class="form-label">Item Category *</label>
+              <select id="reportCategory" class="form-select" required>
+                <option value="" disabled selected>Select category...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reportTitle" class="form-label">Item Title *</label>
+            <input type="text" id="reportTitle" class="form-control" placeholder="e.g., Midnight Blue AirPods Pro Case, TI-84 Plus Calculator" maxlength="150" required>
+          </div>
+
+          <div class="form-group">
+            <label for="reportDescription" class="form-label">Detailed Description *</label>
+            <textarea id="reportDescription" class="form-control" rows="4" placeholder="Provide distinctive characteristics, brand, stickers, scratches, colors, case style..." maxlength="2000" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="reportLocation" class="form-label">Campus Location *</label>
+            <input type="text" id="reportLocation" class="form-control" placeholder="e.g., Science Library 2nd Floor, West Dining Hall, Gym Court A" maxlength="150" required>
+          </div>
+
+          <!-- Photo Upload with OpenCLIP Dropzone -->
+          <div class="form-group">
+            <label class="form-label">
+              Item Photo <span style="color: #c084fc;">(Recommended for OpenCLIP Visual AI Matching)</span>
+            </label>
+
+            <label for="imageUploadInput" class="upload-dropzone" id="uploadDropzone">
+              <div id="dropzonePrompt">
+                <div class="dropzone-icon">📷</div>
+                <div style="font-weight: 600; color: #fff; margin-bottom: 0.25rem;">
+                  Click to select or drag &amp; drop an image
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-dim);">
+                  PNG, JPG, JPEG, WEBP up to 16MB
+                </div>
+              </div>
+
+              <div id="imagePreviewContainer" class="preview-container" style="display: none;">
+                <img id="imagePreviewElement" src="" alt="Selected Preview" class="preview-img">
+                <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #a78bfa; font-weight: 600;">
+                  ✓ Image loaded — OpenCLIP vector will be computed upon submission
+                </div>
+              </div>
+
+              <input type="file" id="imageUploadInput" accept="image/*" style="display: none;">
+            </label>
+          </div>
+
+          <div id="submitFeedback" style="display: none; padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1rem;"></div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="submitReportBtn">
+            🚀 Submit Report &amp; Index AI Embedding
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="nav-brand" style="margin-bottom: 0.85rem;">
+            <div class="brand-icon"><span>🔍</span></div>
+            <span>CampusFind</span>
+          </div>
+          <p style="max-width: 340px; line-height: 1.5; color: var(--text-dim);">
+            Intelligent campus lost & found management system featuring OpenCLIP vision transformers for automated image similarity matching.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Navigation</div>
+          <ul class="footer-links">
+            <li><a href="browse.html">Browse Catalog</a></li>
+            <li><a href="create-report.html?type=LOST">Report Lost Item</a></li>
+            <li><a href="create-report.html?type=FOUND">Report Found Item</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <ul class="footer-links">
+            <li><a href="about.html">OpenCLIP Architecture</a></li>
+            <li><a href="/api/v1/health" target="_blank">Backend Health API</a></li>
+            <li><a href="login.html">Staff & Student Portal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Campus Security</div>
+          <ul class="footer-links">
+            <li><span style="color: var(--text-dim);">Safety Escort: ext 2200</span></li>
+            <li><span style="color: var(--text-dim);">Central Security Desk: Hall B</span></li>
+            <li><span style="color: var(--text-dim);">Emergency: 911</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 CampusFind AI. Built with Spring Boot & OpenCLIP.</div>
+        <div>ViT-B-32 Neural Embeddings active</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    let capturedBase64Image = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Require student/admin authentication
+      if (!auth.isAuthenticated()) {
+        window.location.href = `login.html?redirect=create-report.html${encodeURIComponent(window.location.search)}`;
+        return;
+      }
+
+      // 2. Populate categories
+      const categorySelect = document.getElementById('reportCategory');
+      window.CAMPUSFIND_CONFIG.defaultCategories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        categorySelect.appendChild(opt);
+      });
+
+      // 3. Select type from query params if specified
+      const params = new URLSearchParams(window.location.search);
+      const queryType = params.get('type');
+      if (queryType && (queryType.toUpperCase() === 'LOST' || queryType.toUpperCase() === 'FOUND')) {
+        document.getElementById('reportType').value = queryType.toUpperCase();
+      }
+
+      // 4. Setup drag-and-drop dropzone
+      const dropzone = document.getElementById('uploadDropzone');
+      const fileInput = document.getElementById('imageUploadInput');
+      const previewImg = document.getElementById('imagePreviewElement');
+      const previewContainer = document.getElementById('imagePreviewContainer');
+
+      app.setupDropzone(dropzone, fileInput, previewImg, previewContainer, (base64) => {
+        capturedBase64Image = base64;
+      });
+
+      // 5. Handle form submission
+      const form = document.getElementById('createReportForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('submitReportBtn');
+        const originalText = submitBtn.innerHTML;
+
+        const title = document.getElementById('reportTitle').value.trim();
+        const description = document.getElementById('reportDescription').value.trim();
+        const category = document.getElementById('reportCategory').value;
+        const location = document.getElementById('reportLocation').value.trim();
+        const type = document.getElementById('reportType').value;
+
+        if (!title || !description || !category || !location || !type) {
+          app.showNotification('danger', 'Please complete all required fields.');
+          return;
+        }
+
+        try {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '⏳ Creating Report...';
+
+          // Step 1: Create report entity
+          const reportPayload = {
+            title,
+            description,
+            category,
+            location,
+            type,
+            imageUrl: capturedBase64Image || null
+          };
+
+          const createdReport = await api.createReport(reportPayload);
+
+          // Step 2: If image attached, request OpenCLIP embedding generation
+          if (capturedBase64Image) {
+            submitBtn.innerHTML = '🧠 Indexing OpenCLIP AI Embedding...';
+            try {
+              await api.attachEmbedding(createdReport.id, capturedBase64Image);
+            } catch (aiErr) {
+              console.warn('Embedding generation warning:', aiErr);
+              app.showNotification('warning', 'Report created! Notice: OpenCLIP model was busy or offline, visual embeddings will sync shortly.');
+            }
+          }
+
+          app.showNotification('success', `Report #${createdReport.id} successfully created!`);
+          setTimeout(() => {
+            window.location.href = `detail.html?id=${createdReport.id}`;
+          }, 600);
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+          app.showNotification('danger', err.message || 'Failed to submit report. Please review your input.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

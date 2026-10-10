@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CampusFind{% endblock %} — AI Lost & Found</title>
+  <meta name="description" content="{% block meta_desc %}CampusFind AI: Fast, intelligent campus lost and found powered by OpenCLIP visual AI matching.{% endblock %}">
+  
+  <!-- Modern Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <!-- Top Navigation Header -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="{{ url_for('main.index') }}" class="nav-brand" id="navBrandLink">
+        <div class="brand-icon">
+          <span>🔍</span>
+        </div>
+        <span>CampusFind</span>
+        <span class="brand-badge">AI Core</span>
+      </a>
+
+      <button class="mobile-toggle" id="mobileNavToggle" aria-label="Toggle navigation">
+        ☰
+      </button>
+
+      <ul class="nav-links">
+        <li>
+          <a href="{{ url_for('reports.index') }}" class="nav-link {% if request.endpoint == 'reports.index' %}active{% endif %}" id="navBrowseLink">
+            📋 Browse Items
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('reports.create', type='lost') }}" class="nav-link" id="navReportLostLink">
+            💔 Report Lost
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('reports.create', type='found') }}" class="nav-link" id="navReportFoundLink">
+            ✨ Report Found
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('main.about') }}" class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}" id="navAboutLink">
+            💡 How AI Works
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-actions">
+        {% if current_user.is_authenticated %}
+          <div class="user-menu">
+            <div class="user-avatar-initials">
+              {{ current_user.username[0]|upper }}
+            </div>
+            <a href="{{ url_for('dashboard.index') }}" class="nav-link active" style="padding:0;" id="userProfileLink">
+              {{ current_user.full_name }}
+            </a>
+          </div>
+
+          {% if current_user.is_admin %}
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-secondary" id="adminDashboardBtn">
+              🛡️ Admin
+            </a>
+          {% endif %}
+
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline" id="navLogoutBtn">
+            Sign Out
+          </a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-outline" id="navLoginBtn">
+            Sign In
+          </a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-primary" id="navRegisterBtn">
+            Get Started
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-container" id="flashNotificationArea">
+            {% for category, message in messages %}
+              <div class="flash-alert flash-{{ category }}" role="alert">
+                <span>{{ message }}</span>
+                <button type="button" class="flash-close" aria-label="Close notification">&times;</button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="nav-brand" style="margin-bottom: 0.85rem;">
+            <div class="brand-icon"><span>🔍</span></div>
+            <span>CampusFind</span>
+          </div>
+          <p style="max-width: 340px; line-height: 1.5; color: var(--text-dim);">
+            Intelligent campus lost & found management system featuring OpenCLIP vision transformers for automated image similarity matching.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Navigation</div>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('reports.index') }}">Browse Catalog</a></li>
+            <li><a href="{{ url_for('reports.create', type='lost') }}">Report Lost Item</a></li>
+            <li><a href="{{ url_for('reports.create', type='found') }}">Report Found Item</a></li>
+            <li><a href="{{ url_for('dashboard.index') }}">Student Dashboard</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('main.about') }}">OpenCLIP Architecture</a></li>
+            <li><a href="{{ url_for('main.health') }}" target="_blank">System Health API</a></li>
+            <li><a href="{{ url_for('auth.login') }}">Staff & Student Portal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Campus Security</div>
+          <ul class="footer-links">
+            <li><span style="color: var(--text-dim);">Safety Escort: ext 2200</span></li>
+            <li><span style="color: var(--text-dim);">Central Security Desk: Hall B</span></li>
+            <li><span style="color: var(--text-dim);">Emergency: 911</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 {{ college_name }}. Designed with OpenCLIP AI Engine.</div>
+        <div>ViT-B-32 Neural Embeddings active</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Core Scripts -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

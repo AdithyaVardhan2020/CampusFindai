@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account — CampusFind{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper" style="max-width: 520px;">
+  <div class="auth-header">
+    <div class="brand-icon" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem;">
+      🎓
+    </div>
+    <h1 class="auth-title">Create Campus Account</h1>
+    <p class="auth-subtitle">Join the university network to claim lost belongings or turn in found items.</p>
+  </div>
+
+  <div class="form-card">
+    <form method="POST" action="{{ url_for('auth.register') }}" class="form-stack" novalidate id="registerForm">
+      {{ form.hidden_tag() }}
+
+      <div class="form-group">
+        <label for="{{ form.full_name.id }}" class="form-label">Full Name</label>
+        {{ form.full_name(class="form-control" + (" is-invalid" if form.full_name.errors else ""), placeholder="Jane Doe") }}
+        {% for error in form.full_name.errors %}
+          <div class="form-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label for="{{ form.username.id }}" class="form-label">Username</label>
+          {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder="jdoe") }}
+          {% for error in form.username.errors %}
+            <div class="form-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.phone.id }}" class="form-label">Phone Number (Optional)</label>
+          {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="+1 (555) 000-0000") }}
+          {% for error in form.phone.errors %}
+            <div class="form-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.email.id }}" class="form-label">Campus Email</label>
+        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="jane.doe@university.edu") }}
+        {% for error in form.email.errors %}
+          <div class="form-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label for="{{ form.password.id }}" class="form-label">Password</label>
+          {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="At least 6 characters") }}
+          {% for error in form.password.errors %}
+            <div class="form-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.confirm_password.id }}" class="form-label">Confirm Password</label>
+          {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="Confirm password") }}
+          {% for error in form.confirm_password.errors %}
+            <div class="form-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;" id="registerSubmitBtn">
+        Register Account
+      </button>
+    </form>
+  </div>
+
+  <div style="text-align: center; margin-top: 1.75rem; font-size: 0.92rem; color: var(--text-muted);">
+    Already have an account? 
+    <a href="{{ url_for('auth.login') }}" style="color: var(--primary); font-weight: 600;" id="toLoginLink">
+      Sign in instead &rarr;
+    </a>
+  </div>
+</div>
+{% endblock %}

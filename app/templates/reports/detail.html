@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}{{ report.title }} — CampusFind{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem;">
+  <a href="{{ url_for('reports.index') }}" style="color: var(--text-muted); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+    &larr; Back to Catalog
+  </a>
+</div>
+
+<div class="detail-layout">
+  <!-- Left Column: Item Image & Photo Status -->
+  <div>
+    <div class="detail-gallery">
+      {% if report.image_filename %}
+        <img src="{{ url_for('main.serve_upload', filename=report.image_filename) }}" alt="{{ report.title }}" class="detail-main-img" id="detailMainImage">
+      {% else %}
+        <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="Placeholder Image" class="detail-main-img">
+      {% endif %}
+    </div>
+
+    {% if report.has_embedding %}
+      <div class="card" style="margin-top: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.08); border-color: rgba(139, 92, 246, 0.3);">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: 1.5rem;">🧠</div>
+          <div>
+            <div style="font-weight: 700; color: #c084fc; font-size: 0.9rem;">OpenCLIP Vector Indexed</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+              Normalized 512-d feature vector stored. Actively comparing with candidate reports.
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Right Column: Metadata, Description, & Owner Actions -->
+  <div class="detail-info">
+    <div class="detail-badges">
+      {% if report.is_lost %}
+        <span class="badge badge-lost" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">💔 Lost Item</span>
+      {% else %}
+        <span class="badge badge-found" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">✨ Found Item</span>
+      {% endif %}
+
+      <span class="badge badge-category" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+        {{ report.category }}
+      </span>
+
+      {% if report.status == 'resolved' %}
+        <span class="badge badge-resolved" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+          ✓ Resolved
+        </span>
+      {% else %}
+        <span class="badge" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #6ee7b7; font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+          ● Active / Open
+        </span>
+      {% endif %}
+    </div>
+
+    <h1 class="detail-title">{{ report.title }}</h1>
+
+    <div class="meta-grid">
+      <div class="meta-card">
+        <div class="meta-card-label">Campus Location</div>
+        <div class="meta-card-value">📍 {{ report.location }}</div>
+      </div>
+
+      <div class="meta-card">
+        <div class="meta-card-label">Date Reported</div>
+        <div class="meta-card-value">📅 {{ report.date_incident|format_date }}</div>
+      </div>
+
+      <div class="meta-card">
+        <div class="meta-card-label">Reported By</div>
+        <div class="meta-card-value">👤 {{ report.author.full_name }}</div>
+      </div>
+
+      <div class="meta-card">
+        <div class="meta-card-label">Report ID</div>
+        <div class="meta-card-value">#{{ report.id }}</div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--text-dim); margin-bottom: 0.5rem;">
+        Item Description
+      </div>
+      <div class="detail-desc-box">
+        {{ report.description }}
+      </div>
+    </div>
+
+    <!-- Contact & Handover Info -->
+    <div class="card" style="border-color: rgba(99, 102, 241, 0.35); background: rgba(99, 102, 241, 0.05);">
+      <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: #a5b4fc; margin-bottom: 0.4rem;">
+        Handover / Contact Instructions
+      </div>
+      <div style="font-size: 1rem; font-weight: 600; color: #fff;">
+        {{ report.contact_info }}
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">
+        Please verify credentials or specific identifiers when claiming items.
+      </div>
+    </div>
+
+    <!-- Owner / Admin Action Controls -->
+    {% if can_modify %}
+      <div class="card" style="padding: 1.25rem;">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin-bottom: 0.85rem;">
+          Report Management (Owner / Administrator)
+        </div>
+        
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <form action="{{ url_for('reports.toggle_status', report_id=report.id) }}" method="POST" style="display: inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if report.status == 'open' %}
+              <button type="submit" class="btn btn-found" id="markResolvedBtn">
+                ✓ Mark as Resolved
+              </button>
+            {% else %}
+              <button type="submit" class="btn btn-secondary" id="reopenReportBtn">
+                Reopen Report
+              </button>
+            {% endif %}
+          </form>
+
+          <a href="{{ url_for('reports.edit', report_id=report.id) }}" class="btn btn-secondary" id="editReportBtn">
+            ✏️ Edit Details
+          </a>
+
+          <form action="{{ url_for('reports.delete', report_id=report.id) }}" method="POST" style="display: inline;" data-confirm="Are you sure you want to delete this report? This cannot be undone.">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger" id="deleteReportBtn">
+              🗑️ Delete
+            </button>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- OpenCLIP Neural Similarity Matches -->
+<section class="ai-matches-section">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">
+        <span style="color: #c084fc;">🧠</span> AI Visual Match Candidates
+      </h2>
+      <p class="section-desc">
+        OpenCLIP computed visual similarity between this photo and active {% if report.is_lost %}found{% else %}lost{% endif %} items (Threshold &ge; {{ (similarity_threshold * 100)|round|int }}%).
+      </p>
+    </div>
+  </div>
+
+  {% if matches %}
+    <div>
+      {% for match in matches %}
+        {% set candidate = match.report %}
+        <div class="ai-match-card">
+          {% if candidate.image_filename %}
+            <img src="{{ url_for('main.serve_upload', filename=candidate.image_filename) }}" alt="{{ candidate.title }}" class="ai-match-thumb">
+          {% else %}
+            <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="Placeholder" class="ai-match-thumb">
+          {% endif %}
+
+          <div>
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.35rem;">
+              <span class="badge {% if candidate.is_lost %}badge-lost{% else %}badge-found{% endif %}">
+                {{ candidate.report_type|upper }}
+              </span>
+              <span class="badge badge-category">{{ candidate.category }}</span>
+              <span style="font-size: 0.8rem; color: var(--text-dim);">📍 {{ candidate.location }}</span>
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">
+              {{ candidate.title }}
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+              {{ candidate.description }}
+            </p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem;">
+            <div class="ai-score-pill">
+              <span class="ai-score-pct">{{ match.percentage }}%</span>
+              <span class="ai-score-label">Match Score</span>
+            </div>
+            <a href="{{ url_for('reports.detail', report_id=candidate.id) }}" class="btn btn-sm btn-primary">
+              View Match &rarr;
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 2.5rem 1.5rem; background: rgba(17, 24, 39, 0.4);">
+      <div style="font-size: 2.25rem; margin-bottom: 0.75rem;">🔍</div>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        {% if not report.has_embedding %}
+          No photo was attached to this report. Upload an image to unlock automated OpenCLIP neural matching.
+        {% else %}
+          No opposing reports match above the {{ (similarity_threshold * 100)|round|int }}% similarity threshold yet. The system will continue monitoring new submissions!
+        {% endif %}
+      </p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

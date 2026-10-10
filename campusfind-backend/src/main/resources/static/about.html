@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How AI Works — CampusFind AI</title>
+  <meta name="description" content="Technical overview of CampusFind's OpenCLIP vision transformer architecture and similarity matching pipeline.">
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="nav-brand" id="navBrandLink">
+        <div class="brand-icon"><span>🔍</span></div>
+        <span>CampusFind</span>
+        <span class="brand-badge">AI Core</span>
+      </a>
+
+      <button class="mobile-toggle" id="mobileNavToggle" aria-label="Toggle navigation">☰</button>
+
+      <ul class="nav-links">
+        <li><a href="browse.html" class="nav-link" id="navBrowseLink">📂 Browse Items</a></li>
+        <li><a href="create-report.html?type=LOST" class="nav-link" id="navReportLostLink">📢 Report Lost</a></li>
+        <li><a href="create-report.html?type=FOUND" class="nav-link" id="navReportFoundLink">✨ Report Found</a></li>
+        <li><a href="about.html" class="nav-link active" id="navAboutLink">💡 How AI Works</a></li>
+      </ul>
+
+      <div class="nav-actions" id="navActions"></div>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="main-content">
+    <div class="container" style="max-width: 860px; margin: 0 auto;">
+      <div class="flash-container" id="flashNotificationArea"></div>
+
+      <div style="margin-bottom: 2.5rem; text-align: center;">
+        <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--bg-glass-elevated); border: 1px solid var(--border-glow); padding: 0.35rem 0.9rem; border-radius: var(--radius-full); margin-bottom: 1rem;">
+          <span style="font-size: 0.85rem; color: #c084fc; font-weight: 600;">🧠 Multimodal Vision Transformers</span>
+        </div>
+        <h1 style="font-size: 2.75rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; margin-bottom: 0.75rem;">
+          OpenCLIP Neural Matching Architecture
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.6;">
+          How CampusFind AI compares visual features without relying solely on keywords or manual tagging.
+        </p>
+      </div>
+
+      <!-- Live Diagnostics Status Card -->
+      <div class="card" style="padding: 1.5rem; margin-bottom: 2.5rem; border-color: rgba(139, 92, 246, 0.35); background: rgba(139, 92, 246, 0.06);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div style="font-weight: 700; color: #fff; font-size: 1.05rem;">OpenCLIP AI Microservice Status</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);" id="aiHealthDetails">Checking OpenCLIP inference status...</div>
+          </div>
+          <span class="badge badge-found" id="aiHealthBadge" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">Checking...</span>
+        </div>
+      </div>
+
+      <!-- Architecture Pipeline Steps -->
+      <section style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 3rem;">
+        <div class="card" style="padding: 1.75rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">
+            1. Image Preprocessing &amp; Normalization
+          </h3>
+          <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+            When a student uploads a photo, Pillow processes the stream, applies bicubic interpolation, and standardizes image resolution to 224&times;224 RGB tensors using standard CLIP normalization transforms.
+          </p>
+        </div>
+
+        <div class="card" style="padding: 1.75rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">
+            2. ViT-B-32 Feature Extraction
+          </h3>
+          <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+            The Python AI microservice passes the tensor through the pretrained <code>ViT-B-32</code> (OpenAI weights) vision transformer encoder. The output is projected into a 512-dimensional vector and L2-normalized ($||\mathbf{v}||_2 = 1$).
+          </p>
+        </div>
+
+        <div class="card" style="padding: 1.75rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">
+            3. Java Orchestration &amp; Cosine Ranking
+          </h3>
+          <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+            The Java Spring Boot backend stores the visual vector in the database. When candidate matches are requested for a report, the backend queries active opposing reports (e.g. comparing LOST with FOUND) and calls the Python rank endpoint to compute cosine similarity:
+          </p>
+          <div style="background: rgba(0, 0, 0, 0.4); padding: 0.85rem; border-radius: var(--radius-sm); margin-top: 0.75rem; font-family: monospace; font-size: 0.9rem; color: #a78bfa;">
+            Similarity(u, v) = (u &middot; v) / (||u|| * ||v||)
+          </div>
+        </div>
+
+        <div class="card" style="padding: 1.75rem; border-color: rgba(244, 63, 94, 0.25);">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #fb7185; margin-bottom: 0.5rem;">
+            4. Human-in-the-Loop Safety Rule
+          </h3>
+          <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+            Similarity scores only assist students in locating possible matches. Reports are never automatically closed or marked as resolved by the AI. Campus security and students retain full control over handover and claim verification.
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="nav-brand" style="margin-bottom: 0.85rem;">
+            <div class="brand-icon"><span>🔍</span></div>
+            <span>CampusFind</span>
+          </div>
+          <p style="max-width: 340px; line-height: 1.5; color: var(--text-dim);">
+            Intelligent campus lost & found management system featuring OpenCLIP vision transformers for automated image similarity matching.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Navigation</div>
+          <ul class="footer-links">
+            <li><a href="browse.html">Browse Catalog</a></li>
+            <li><a href="create-report.html?type=LOST">Report Lost Item</a></li>
+            <li><a href="create-report.html?type=FOUND">Report Found Item</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <ul class="footer-links">
+            <li><a href="about.html">OpenCLIP Architecture</a></li>
+            <li><a href="/api/v1/health" target="_blank">Backend Health API</a></li>
+            <li><a href="login.html">Staff & Student Portal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Campus Security</div>
+          <ul class="footer-links">
+            <li><span style="color: var(--text-dim);">Safety Escort: ext 2200</span></li>
+            <li><span style="color: var(--text-dim);">Central Security Desk: Hall B</span></li>
+            <li><span style="color: var(--text-dim);">Emergency: 911</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 CampusFind AI. Built with Spring Boot & OpenCLIP.</div>
+        <div>ViT-B-32 Neural Embeddings active</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const badge = document.getElementById('aiHealthBadge');
+      const details = document.getElementById('aiHealthDetails');
+
+      if (!auth.isAuthenticated()) {
+        badge.className = 'badge badge-lost';
+        badge.textContent = 'Auth Required';
+        details.textContent = 'Sign in to inspect real-time AI service diagnostics.';
+        return;
+      }
+
+      try {
+        const health = await api.checkAiHealth();
+        if (health && health.status === 'UP') {
+          badge.className = 'badge badge-found';
+          badge.textContent = 'AI Service UP';
+          const model = (health.ai && health.ai.model_name) || 'ViT-B-32';
+          const source = (health.ai && health.ai.pretrained) || 'openai';
+          details.textContent = `Model: ${model} (${source}) • Device: ${(health.ai && health.ai.device) || 'CPU'} • Inference ready`;
+        } else {
+          badge.className = 'badge badge-lost';
+          badge.textContent = 'AI Offline';
+          details.textContent = 'OpenCLIP service is currently offline or returning degraded status.';
+        }
+      } catch (err) {
+        badge.className = 'badge badge-lost';
+        badge.textContent = 'AI Standby';
+        details.textContent = 'Unable to connect to AI health endpoint (Service offline).';
+      }
+    });
+  </script>
+</body>
+</html>

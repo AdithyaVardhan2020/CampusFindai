@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Details — CampusFind AI</title>
+  <meta name="description" content="View lost/found item details, status, and OpenCLIP AI candidate matches.">
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="nav-brand" id="navBrandLink">
+        <div class="brand-icon"><span>🔍</span></div>
+        <span>CampusFind</span>
+        <span class="brand-badge">AI Core</span>
+      </a>
+
+      <button class="mobile-toggle" id="mobileNavToggle" aria-label="Toggle navigation">☰</button>
+
+      <ul class="nav-links">
+        <li><a href="browse.html" class="nav-link" id="navBrowseLink">📂 Browse Items</a></li>
+        <li><a href="create-report.html?type=LOST" class="nav-link" id="navReportLostLink">📢 Report Lost</a></li>
+        <li><a href="create-report.html?type=FOUND" class="nav-link" id="navReportFoundLink">✨ Report Found</a></li>
+        <li><a href="about.html" class="nav-link" id="navAboutLink">💡 How AI Works</a></li>
+      </ul>
+
+      <div class="nav-actions" id="navActions"></div>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="main-content">
+    <div class="container">
+      <div class="flash-container" id="flashNotificationArea"></div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <a href="browse.html" style="color: var(--text-muted); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+          &larr; Back to Catalog
+        </a>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div id="detailLoading" style="text-align: center; padding: 4rem;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏳</div>
+        <p style="color: var(--text-muted);">Loading report information &amp; AI matches...</p>
+      </div>
+
+      <!-- Report Detail View -->
+      <div id="detailContent" style="display: none;">
+        <div class="detail-layout">
+          <!-- Left Column: Item Image & Neural Vector Badge -->
+          <div>
+            <div class="detail-gallery">
+              <img id="detailImg" src="images/placeholder.svg" alt="Item Image" class="detail-main-img" onerror="this.onerror=null; this.src='images/placeholder.svg';">
+            </div>
+
+            <div class="card" style="margin-top: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.08); border-color: rgba(139, 92, 246, 0.3);" id="openClipBadgeCard">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="font-size: 1.5rem;">🧠</div>
+                <div>
+                  <div style="font-weight: 700; color: #c084fc; font-size: 0.9rem;">OpenCLIP Vector Indexed</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">
+                    Normalized 512-d feature vector stored. Actively comparing with candidate reports.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Metadata, Description, & Actions -->
+          <div class="detail-info">
+            <div class="detail-badges" id="detailBadges"></div>
+
+            <h1 class="detail-title" id="detailTitle">...</h1>
+
+            <div class="meta-grid">
+              <div class="meta-card">
+                <div class="meta-card-label">Campus Location</div>
+                <div class="meta-card-value" id="detailLocation">...</div>
+              </div>
+
+              <div class="meta-card">
+                <div class="meta-card-label">Date Reported</div>
+                <div class="meta-card-value" id="detailDate">...</div>
+              </div>
+
+              <div class="meta-card">
+                <div class="meta-card-label">Reported By</div>
+                <div class="meta-card-value" id="detailReporter">...</div>
+              </div>
+
+              <div class="meta-card">
+                <div class="meta-card-label">Report ID</div>
+                <div class="meta-card-value" id="detailId">...</div>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--text-dim); margin-bottom: 0.5rem;">
+                Item Description
+              </div>
+              <div class="detail-desc-box" id="detailDesc">...</div>
+            </div>
+
+            <!-- Owner & Admin Actions Card -->
+            <div class="card" id="ownerActionsCard" style="display: none; padding: 1.25rem; border-color: rgba(255, 255, 255, 0.12);">
+              <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin-bottom: 0.85rem;">
+                Report Management (Author / Admin)
+              </div>
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;" id="ownerActionButtons"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OpenCLIP Neural Similarity Matches Section -->
+        <section class="ai-matches-section" style="margin-top: 3rem;">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">
+                <span style="color: #c084fc;">🧠</span> AI Visual Match Candidates
+              </h2>
+              <p class="section-desc" id="aiSectionDesc">
+                OpenCLIP computed visual similarity between this photo and opposing active items (Threshold &ge; 60%).
+              </p>
+            </div>
+          </div>
+
+          <div id="aiLoadingIndicator" style="text-align: center; padding: 2rem; display: none;">
+            <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">⏳</div>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Comparing OpenCLIP vectors across campus items...</p>
+          </div>
+
+          <!-- Candidate Matches List -->
+          <div id="aiMatchesList"></div>
+
+          <!-- Empty or Notice Card -->
+          <div id="aiEmptyNotice" class="card" style="display: none; text-align: center; padding: 2.5rem 1.5rem; background: rgba(17, 24, 39, 0.4);">
+            <div style="font-size: 2.25rem; margin-bottom: 0.75rem;">🔍</div>
+            <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 520px; margin: 0 auto;" id="aiEmptyMessage">
+              No opposing reports match above the 60% similarity threshold yet. The system will continue monitoring new submissions!
+            </p>
+          </div>
+
+          <div style="margin-top: 1.25rem; font-size: 0.8rem; color: var(--text-dim); text-align: center;">
+            ⚠️ Disclaimer: High AI similarity scores represent visual likeness suggestions for student verification, and do not constitute definitive ownership proof or auto-resolution.
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="nav-brand" style="margin-bottom: 0.85rem;">
+            <div class="brand-icon"><span>🔍</span></div>
+            <span>CampusFind</span>
+          </div>
+          <p style="max-width: 340px; line-height: 1.5; color: var(--text-dim);">
+            Intelligent campus lost & found management system featuring OpenCLIP vision transformers for automated image similarity matching.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Navigation</div>
+          <ul class="footer-links">
+            <li><a href="browse.html">Browse Catalog</a></li>
+            <li><a href="create-report.html?type=LOST">Report Lost Item</a></li>
+            <li><a href="create-report.html?type=FOUND">Report Found Item</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <ul class="footer-links">
+            <li><a href="about.html">OpenCLIP Architecture</a></li>
+            <li><a href="/api/v1/health" target="_blank">Backend Health API</a></li>
+            <li><a href="login.html">Staff & Student Portal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Campus Security</div>
+          <ul class="footer-links">
+            <li><span style="color: var(--text-dim);">Safety Escort: ext 2200</span></li>
+            <li><span style="color: var(--text-dim);">Central Security Desk: Hall B</span></li>
+            <li><span style="color: var(--text-dim);">Emergency: 911</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 CampusFind AI. Built with Spring Boot & OpenCLIP.</div>
+        <div>ViT-B-32 Neural Embeddings active</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    let currentReport = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const params = new URLSearchParams(window.location.search);
+      const reportId = params.get('id');
+
+      if (!reportId) {
+        app.showNotification('danger', 'Missing report ID.');
+        setTimeout(() => window.location.href = 'browse.html', 1500);
+        return;
+      }
+
+      await loadReportDetails(reportId);
+    });
+
+    async function loadReportDetails(id) {
+      const loading = document.getElementById('detailLoading');
+      const content = document.getElementById('detailContent');
+
+      try {
+        currentReport = await api.getReport(id);
+
+        document.getElementById('detailTitle').textContent = currentReport.title;
+        document.getElementById('detailDesc').textContent = currentReport.description;
+        document.getElementById('detailLocation').textContent = `📍 ${currentReport.location || 'Campus'}`;
+        document.getElementById('detailDate').textContent = `📅 ${app.formatDate(currentReport.createdAt)}`;
+        document.getElementById('detailReporter').textContent = `👤 ${currentReport.reporterName || 'Student'}`;
+        document.getElementById('detailId').textContent = `#${currentReport.id}`;
+
+        const hasValidImg = currentReport.imageUrl && currentReport.imageUrl.trim() && currentReport.imageUrl !== 'null';
+        document.getElementById('detailImg').src = hasValidImg ? currentReport.imageUrl : 'images/placeholder.svg';
+
+        // Render Badges
+        const isLost = currentReport.type === 'LOST';
+        const isResolved = currentReport.status === 'RESOLVED';
+        const badgesContainer = document.getElementById('detailBadges');
+        badgesContainer.innerHTML = `
+          <span class="badge ${isLost ? 'badge-lost' : 'badge-found'}" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+            ${isLost ? '📢 Lost Item' : '✨ Found Item'}
+          </span>
+          <span class="badge badge-category" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+            ${app.escapeHtml(currentReport.category || 'General')}
+          </span>
+          <span class="badge ${isResolved ? 'badge-resolved' : 'badge-found'}" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+            ${isResolved ? '✓ Resolved' : '● Active / Open'}
+          </span>
+        `;
+
+        // Check author or admin permissions
+        setupAuthorActions(currentReport);
+
+        loading.style.display = 'none';
+        content.style.display = 'block';
+
+        // Load OpenCLIP similarity candidate matches
+        loadAiMatches(currentReport.id, isLost);
+      } catch (err) {
+        loading.innerHTML = `
+          <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">⚠️</div>
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">Report Not Found</h3>
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem;">
+            ${app.escapeHtml(err.message)}
+          </p>
+          <a href="browse.html" class="btn btn-primary">&larr; Return to Catalog</a>
+        `;
+      }
+    }
+
+    function setupAuthorActions(report) {
+      if (!auth.isAuthenticated()) return;
+      const currentUser = auth.getUser();
+      const isOwner = currentUser && (currentUser.email === report.reporterEmail || currentUser.id === report.reporterId);
+      const isAdmin = auth.isAdmin();
+
+      if (!isOwner && !isAdmin) return;
+
+      const actionsCard = document.getElementById('ownerActionsCard');
+      const buttonsContainer = document.getElementById('ownerActionButtons');
+      actionsCard.style.display = 'block';
+
+      const isResolved = report.status === 'RESOLVED';
+      buttonsContainer.innerHTML = `
+        <button type="button" class="btn ${isResolved ? 'btn-secondary' : 'btn-found'}" id="toggleStatusBtn">
+          ${isResolved ? '🔄 Reopen Report' : '✓ Mark as Resolved'}
+        </button>
+        <button type="button" class="btn btn-danger" id="deleteReportBtn">
+          🗑️ Delete Report
+        </button>
+      `;
+
+      document.getElementById('toggleStatusBtn').addEventListener('click', async () => {
+        const nextStatus = isResolved ? 'OPEN' : 'RESOLVED';
+        try {
+          await api.updateReportStatus(report.id, nextStatus);
+          app.showNotification('success', `Report #${report.id} status changed to ${nextStatus}.`);
+          await loadReportDetails(report.id);
+        } catch (err) {
+          app.showNotification('danger', err.message || 'Failed to update status.');
+        }
+      });
+
+      document.getElementById('deleteReportBtn').addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to delete this report? This action cannot be undone.')) return;
+        try {
+          await api.deleteReport(report.id);
+          app.showNotification('success', `Report #${report.id} deleted successfully.`);
+          setTimeout(() => window.location.href = 'browse.html', 1000);
+        } catch (err) {
+          app.showNotification('danger', err.message || 'Failed to delete report.');
+        }
+      });
+    }
+
+    async function loadAiMatches(reportId, isLost) {
+      const loading = document.getElementById('aiLoadingIndicator');
+      const list = document.getElementById('aiMatchesList');
+      const empty = document.getElementById('aiEmptyNotice');
+      const emptyMsg = document.getElementById('aiEmptyMessage');
+
+      loading.style.display = 'block';
+      list.innerHTML = '';
+      empty.style.display = 'none';
+
+      try {
+        const matches = await api.getMatches(reportId);
+        loading.style.display = 'none';
+
+        if (!matches || matches.length === 0) {
+          empty.style.display = 'block';
+          emptyMsg.textContent = `No opposing ${isLost ? 'found' : 'lost'} items match above the 60% OpenCLIP threshold. The neural engine monitors every newly indexed item automatically!`;
+          return;
+        }
+
+        matches.forEach(match => {
+          const candidate = match.report;
+          const candidateIsLost = candidate.type === 'LOST';
+          const hasCandidateImg = candidate.imageUrl && candidate.imageUrl.trim() && candidate.imageUrl !== 'null';
+          const thumb = hasCandidateImg ? candidate.imageUrl : 'images/placeholder.svg';
+          const thumbSrc = thumb.startsWith('data:') ? thumb : app.escapeHtml(thumb);
+
+          const card = document.createElement('div');
+          card.className = 'ai-match-card';
+          card.innerHTML = `
+            <img src="${thumbSrc}" alt="${app.escapeHtml(candidate.title)}" class="ai-match-thumb" onerror="this.onerror=null; this.src='images/placeholder.svg';">
+
+            <div>
+              <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.35rem; flex-wrap: wrap;">
+                <span class="badge ${candidateIsLost ? 'badge-lost' : 'badge-found'}">
+                  ${candidateIsLost ? 'LOST' : 'FOUND'}
+                </span>
+                <span class="badge badge-category">${app.escapeHtml(candidate.category || 'General')}</span>
+                <span style="font-size: 0.8rem; color: var(--text-dim);">📍 ${app.escapeHtml(candidate.location || 'Campus')}</span>
+              </div>
+              <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">
+                ${app.escapeHtml(candidate.title)}
+              </h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                ${app.escapeHtml(candidate.description)}
+              </p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem;">
+              <div class="ai-score-pill">
+                <span class="ai-score-pct">${match.matchPercentage}%</span>
+                <span class="ai-score-label">Match Score</span>
+              </div>
+              <a href="detail.html?id=${candidate.id}" class="btn btn-sm btn-primary">
+                View Match &rarr;
+              </a>
+            </div>
+          `;
+          list.appendChild(card);
+        });
+      } catch (err) {
+        loading.style.display = 'none';
+        empty.style.display = 'block';
+        if (err.status === 503) {
+          emptyMsg.innerHTML = `<span style="color: #f59e0b; font-weight: 600;">AI Service Standby:</span> OpenCLIP Python service is currently offline or warming up. Matches will display once the service is started.`;
+        } else {
+          emptyMsg.textContent = `Unable to compute visual matches (${err.message || 'Error contacting matching API'}).`;
+        }
+      }
+    }
+  </script>
+</body>
+</html>

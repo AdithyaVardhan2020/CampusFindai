@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}About CampusFind — AI Visual Intelligence{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+  <div style="text-align: center; margin-bottom: 3rem;">
+    <div class="badge badge-ai" style="margin-bottom: 1rem;">System Architecture & AI Docs</div>
+    <h1 style="font-size: 2.5rem; font-weight: 800; color: #fff; letter-spacing: -0.02em;">
+      Intelligent Campus Belonging Recovery
+    </h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+      Engineered for university scale with PyTorch OpenCLIP Vision Transformers and Cloud Database resilience.
+    </p>
+  </div>
+
+  <!-- AI Engine Live Diagnostics -->
+  <div class="card" style="margin-bottom: 2rem; border-color: rgba(139, 92, 246, 0.4);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+        <span>🧠</span> AI Inference Status
+      </h3>
+      {% if ai_status.available %}
+        <span class="badge badge-found">Engine Online ({{ ai_status.device|upper }})</span>
+      {% else %}
+        <span class="badge badge-resolved">Ready / Initializing</span>
+      {% endif %}
+    </div>
+
+    <div class="meta-grid">
+      <div class="meta-card">
+        <div class="meta-card-label">Active Architecture</div>
+        <div class="meta-card-value">{{ ai_status.model_name }} ({{ ai_status.pretrained }})</div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-card-label">Embedding Vector Size</div>
+        <div class="meta-card-value">512 Dimensions (L2-Normalized)</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 1rem; background: rgba(0, 0, 0, 0.3); border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-muted); font-family: monospace;">
+      Diagnostic Log: {{ ai_status.message }}
+    </div>
+  </div>
+
+  <!-- 3-Pillar Technical Highlights -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.75rem;">⚡</div>
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">
+        Cosine Similarity Matching
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
+        Images uploaded for lost and found reports are preprocessed and fed through a frozen vision backbone. Dot-product similarity identifies identical or similar items even across angles and lighting.
+      </p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.75rem;">🛡️</div>
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">
+        Enterprise Security & Verification
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
+        Built with Flask-WTF CSRF tokens, Werkzeug salted hashes, session cookies with HTTPOnly protection, and strict MIME-type image file sanitization.
+      </p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.75rem;">☁️</div>
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">
+        Cloud MySQL & SQLite Fallback
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
+        Supports high-availability Aiven Cloud MySQL with SSL verification while maintaining a zero-configuration SQLite local database fallback for development.
+      </p>
+    </div>
+  </div>
+
+  <!-- Safety & Protocol Notice -->
+  <div class="card" style="border-left: 4px solid var(--primary);">
+    <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">
+      Campus Safety & Verification Protocol
+    </h3>
+    <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6;">
+      To prevent fraudulent claims, never publish sensitive serial numbers, device PINs, or confidential ID information in item descriptions. When retrieving an item, campus security or students may request proof of ownership (e.g. unlocking a screen, matching student ID number, or describing unphotographed contents).
+    </p>
+  </div>
+</div>
+{% endblock %}

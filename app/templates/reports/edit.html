@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Report: {{ report.title }} — CampusFind{% endblock %}
+
+{% block content %}
+<div style="max-width: 760px; margin: 0 auto;">
+  <div style="margin-bottom: 2rem;">
+    <a href="{{ url_for('reports.detail', report_id=report.id) }}" style="color: var(--text-muted); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 0.75rem;">
+      &larr; Back to Report Details
+    </a>
+    <h1 style="font-size: 2.2rem; font-weight: 800; color: #fff; letter-spacing: -0.02em;">
+      Edit Report #{{ report.id }}
+    </h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Update details, adjust report status, or replace the attached photograph.
+    </p>
+  </div>
+
+  <div class="form-card">
+    <form method="POST" action="{{ url_for('reports.edit', report_id=report.id) }}" enctype="multipart/form-data" class="form-stack" novalidate id="editReportForm">
+      {{ form.hidden_tag() }}
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem;">
+        <div class="form-group">
+          <label for="{{ form.report_type.id }}" class="form-label">Report Type *</label>
+          {{ form.report_type(class="form-select" + (" is-invalid" if form.report_type.errors else "")) }}
+          {% for error in form.report_type.errors %}
+            <div class="form-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.category.id }}" class="form-label">Item Category *</label>
+          {{ form.category(class="form-select" + (" is-invalid" if form.category.errors else "")) }}
+          {% for error in form.category.errors %}
+            <div class="form-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.status.id }}" class="form-label">Status *</label>
+          {{ form.status(class="form-select" + (" is-invalid" if form.status.errors else "")) }}
+          {% for error in form.status.errors %}
+            <div class="form-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.title.id }}" class="form-label">Item Title *</label>
+        {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else "")) }}
+        {% for error in form.title.errors %}
+          <div class="form-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.description.id }}" class="form-label">Detailed Description *</label>
+        {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=4) }}
+        {% for error in form.description.errors %}
+          <div class="form-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+        <div class="form-group">
+          <label for="{{ form.date_incident.id }}" class="form-label">Date Lost / Found *</label>
+          {{ form.date_incident(class="form-control" + (" is-invalid" if form.date_incident.errors else ""), type="date") }}
+          {% for error in form.date_incident.errors %}
+            <div class="form-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.location.id }}" class="form-label">Campus Location *</label>
+          {{ form.location(class="form-control" + (" is-invalid" if form.location.errors else "")) }}
+          {% for error in form.location.errors %}
+            <div class="form-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.contact_info.id }}" class="form-label">Contact / Handover Instructions *</label>
+        {{ form.contact_info(class="form-control" + (" is-invalid" if form.contact_info.errors else "")) }}
+        {% for error in form.contact_info.errors %}
+          <div class="form-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Current Image & Replacement Dropzone -->
+      <div class="form-group">
+        <label class="form-label">Current Photo</label>
+        {% if report.image_filename %}
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+            <img src="{{ url_for('main.serve_upload', filename=report.image_filename) }}" alt="Current photo" style="width: 80px; height: 80px; border-radius: var(--radius-sm); object-fit: cover;">
+            <div style="font-size: 0.85rem; color: var(--text-muted);">
+              Current image active. Uploading a new image below will overwrite and recalculate AI embeddings.
+            </div>
+          </div>
+        {% else %}
+          <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.5rem;">No image currently attached.</div>
+        {% endif %}
+
+        <label for="imageUploadInput" class="upload-dropzone" id="uploadDropzone">
+          <div id="dropzonePrompt">
+            <div class="dropzone-icon">📷</div>
+            <div style="font-weight: 600; color: #fff; margin-bottom: 0.25rem;">
+              Click to replace photo or drag & drop new file
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-dim);">
+              PNG, JPG, JPEG, WEBP up to 16MB
+            </div>
+          </div>
+
+          <div id="imagePreviewContainer" class="preview-container">
+            <img id="imagePreviewElement" class="preview-image" alt="Upload Preview">
+          </div>
+
+          {{ form.image(id="imageUploadInput", style="display: none;") }}
+        </label>
+        {% for error in form.image.errors %}
+          <div class="form-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem;">
+        <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;" id="updateReportBtn">
+          Save Changes
+        </button>
+        <a href="{{ url_for('reports.detail', report_id=report.id) }}" class="btn btn-secondary btn-lg">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

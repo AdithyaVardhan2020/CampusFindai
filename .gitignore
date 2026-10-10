@@ -1,0 +1,73 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment variables & secrets
+.env
+*.pem
+*.crt
+*.key
+*.ca
+
+# Flask / SQLite local databases
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# User uploaded files (keep directory, ignore contents except gitkeep)
+uploads/*
+!uploads/.gitkeep
+!uploads/placeholder.svg
+
+# Test cache & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE & OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Aiven credentials and environment scripts
+aiven-env.ps1
+
+# Java build output
+campusfind-backend/target/
+
+# Environment files
+.env.*
+!.env.example
+

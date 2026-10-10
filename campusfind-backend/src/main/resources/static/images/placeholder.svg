@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bgGrad)"/>
+  <g transform="translate(150, 85)">
+    <!-- Box icon -->
+    <path d="M10 25 L50 5 L90 25 L50 45 Z" fill="url(#iconGrad)" opacity="0.9"/>
+    <path d="M10 25 L50 45 L50 85 L10 65 Z" fill="#1e40af" opacity="0.8"/>
+    <path d="M50 45 L90 25 L90 65 L50 85 Z" fill="#2563eb" opacity="0.7"/>
+    <!-- Magnifier icon overlay -->
+    <circle cx="68" cy="72" r="18" fill="white" stroke="#2563eb" stroke-width="4"/>
+    <line x1="81" y1="85" x2="95" y2="99" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/>
+    <path d="M63 67 A7 7 0 0 1 73 67" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <text x="200" y="215" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#475569" text-anchor="middle">No Image Provided</text>
+  <text x="200" y="238" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle">CampusFind AI System</text>
+</svg>

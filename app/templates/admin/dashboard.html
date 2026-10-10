@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Console — CampusFind{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">
+      <span>🛡️</span> Campus Administrator Console
+    </h1>
+    <p class="section-desc">System operations, user governance, AI engine metrics, and moderation controls.</p>
+  </div>
+</div>
+
+<!-- System Diagnostic Cards -->
+<div class="stats-grid" style="margin-bottom: 2.5rem;">
+  <div class="stat-card">
+    <div class="stat-icon total">👥</div>
+    <div>
+      <div class="stat-number">{{ total_users }}</div>
+      <div class="stat-label">Total Users ({{ total_students }} Students)</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon lost">📦</div>
+    <div>
+      <div class="stat-number">{{ total_reports }}</div>
+      <div class="stat-label">Total Reports Filed</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon found">🧠</div>
+    <div>
+      <div class="stat-number">{{ reports_with_embeddings }}</div>
+      <div class="stat-label">Neural Embeddings Generated</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon resolved">🤝</div>
+    <div>
+      <div class="stat-number">{{ total_resolved }}</div>
+      <div class="stat-label">Resolved / Returned</div>
+    </div>
+  </div>
+</div>
+
+<!-- Infrastructure & AI Engine Health Card -->
+<div class="card" style="margin-bottom: 2.5rem; border-color: rgba(99, 102, 241, 0.35);">
+  <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+    <span>⚙️</span> Backend Infrastructure & Inference Status
+  </h3>
+
+  <div class="meta-grid">
+    <div class="meta-card">
+      <div class="meta-card-label">Database Engine</div>
+      <div class="meta-card-value">
+        {{ db_engine|upper }}
+        {% if using_sqlite %}
+          <span style="font-size: 0.75rem; color: #fbbf24; font-weight: normal;">(Local SQLite Fallback)</span>
+        {% else %}
+          <span style="font-size: 0.75rem; color: #34d399; font-weight: normal;">(Aiven Cloud Managed)</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="meta-card">
+      <div class="meta-card-label">AI Matching Service</div>
+      <div class="meta-card-value">
+        {% if ai_status.available %}
+          <span style="color: #34d399;">Active</span> ({{ ai_status.device|upper }})
+        {% else %}
+          <span style="color: #fbbf24;">Standby / Ready</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="meta-card">
+      <div class="meta-card-label">Vision Model Weights</div>
+      <div class="meta-card-value">{{ ai_status.model_name }} / {{ ai_status.pretrained }}</div>
+    </div>
+
+    <div class="meta-card">
+      <div class="meta-card-label">Photo Uploads On Disk</div>
+      <div class="meta-card-value">{{ reports_with_images }} / {{ total_reports }} Reports</div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Reports Moderation Table -->
+<div class="card" style="margin-bottom: 2.5rem; padding: 0; overflow: hidden;">
+  <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff;">
+      Recent Reports Moderation
+    </h3>
+    <span style="font-size: 0.82rem; color: var(--text-dim);">Showing up to 15 recent items</span>
+  </div>
+
+  <div style="overflow-x: auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Item Title</th>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Author</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in recent_reports %}
+          <tr>
+            <td>#{{ r.id }}</td>
+            <td>
+              <a href="{{ url_for('reports.detail', report_id=r.id) }}" style="font-weight: 600; color: #fff;">
+                {{ r.title }}
+              </a>
+              {% if r.has_embedding %}
+                <span style="font-size: 0.7rem; color: #c084fc; display: block;">🧠 AI Vector</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.is_lost %}
+                <span class="badge badge-lost">Lost</span>
+              {% else %}
+                <span class="badge badge-found">Found</span>
+              {% endif %}
+            </td>
+            <td><span class="badge badge-category">{{ r.category }}</span></td>
+            <td>{{ r.author.username }}</td>
+            <td>{{ r.date_incident|format_date }}</td>
+            <td>
+              {% if r.status == 'resolved' %}
+                <span class="badge badge-resolved">Resolved</span>
+              {% else %}
+                <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">Open</span>
+              {% endif %}
+            </td>
+            <td>
+              <div style="display: flex; gap: 0.4rem;">
+                <a href="{{ url_for('reports.detail', report_id=r.id) }}" class="btn btn-sm btn-outline">
+                  View
+                </a>
+                <form action="{{ url_for('admin.delete_report', report_id=r.id) }}" method="POST" style="display: inline;" data-confirm="Remove report #{{ r.id }} permanently as an admin?">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-sm btn-danger">
+                    Delete
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Registered Users Governance Table -->
+<div class="card" style="padding: 0; overflow: hidden;">
+  <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff;">
+      Student & Staff Accounts
+    </h3>
+    <span style="font-size: 0.82rem; color: var(--text-dim);">Total Accounts: {{ total_users }}</span>
+  </div>
+
+  <div style="overflow-x: auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Full Name</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Registered</th>
+          <th>Account Control</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in recent_users %}
+          <tr>
+            <td>#{{ u.id }}</td>
+            <td style="font-weight: 600; color: #fff;">{{ u.full_name }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>
+              {% if u.is_admin %}
+                <span class="badge badge-ai">Admin</span>
+              {% else %}
+                <span class="badge badge-category">Student</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if u.is_active %}
+                <span class="badge badge-found">Active</span>
+              {% else %}
+                <span class="badge badge-lost">Disabled</span>
+              {% endif %}
+            </td>
+            <td>{{ u.created_at|format_date }}</td>
+            <td>
+              {% if u.id != current_user.id %}
+                <form action="{{ url_for('admin.toggle_user_status', user_id=u.id) }}" method="POST" style="display: inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-sm {% if u.is_active %}btn-outline{% else %}btn-found{% endif %}">
+                    {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                  </button>
+                </form>
+              {% else %}
+                <span style="font-size: 0.8rem; color: var(--text-dim);">(Current User)</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account — CampusFind AI</title>
+  <meta name="description" content="Register for a campus lost and found account. Public registrations are enrolled as student accounts.">
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="nav-brand" id="navBrandLink">
+        <div class="brand-icon"><span>🔍</span></div>
+        <span>CampusFind</span>
+        <span class="brand-badge">AI Core</span>
+      </a>
+
+      <button class="mobile-toggle" id="mobileNavToggle" aria-label="Toggle navigation">☰</button>
+
+      <ul class="nav-links">
+        <li><a href="browse.html" class="nav-link" id="navBrowseLink">📂 Browse Items</a></li>
+        <li><a href="create-report.html?type=LOST" class="nav-link" id="navReportLostLink">📢 Report Lost</a></li>
+        <li><a href="create-report.html?type=FOUND" class="nav-link" id="navReportFoundLink">✨ Report Found</a></li>
+        <li><a href="about.html" class="nav-link" id="navAboutLink">💡 How AI Works</a></li>
+      </ul>
+
+      <div class="nav-actions" id="navActions"></div>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="main-content">
+    <div class="container">
+      <div class="flash-container" id="flashNotificationArea"></div>
+
+      <div class="auth-wrapper" style="max-width: 520px; margin: 2rem auto;">
+        <div class="auth-header">
+          <div class="brand-icon" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; background: var(--primary-gradient); border-radius: var(--radius-md);">
+            <span>🎓</span>
+          </div>
+          <h1 class="auth-title">Create Campus Account</h1>
+          <p class="auth-subtitle">Join the university network to claim lost belongings or turn in found items.</p>
+        </div>
+
+        <div class="form-card">
+          <form class="form-stack" id="registerForm">
+            <div class="form-group">
+              <label for="regFullName" class="form-label">Full Name *</label>
+              <input type="text" id="regFullName" class="form-control" placeholder="e.g. Jane Doe" required maxlength="100">
+            </div>
+
+            <div class="form-group">
+              <label for="regEmail" class="form-label">Campus Email *</label>
+              <input type="email" id="regEmail" class="form-control" placeholder="jane.doe@campus.edu" required maxlength="120" autocomplete="username">
+            </div>
+
+            <div class="register-password-grid">
+              <div class="form-group">
+                <label for="regPassword" class="form-label">Password *</label>
+                <div class="password-input-wrapper">
+                  <input type="password" id="regPassword" class="form-control" placeholder="Min. 8 chars" required minlength="8" maxlength="100" autocomplete="new-password">
+                  <button type="button" class="btn-toggle-password" id="toggleRegPassword" aria-label="Show password" title="Show password" data-target="regPassword">
+                    <svg class="eye-icon eye-icon-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <svg class="eye-icon eye-icon-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+                      <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+                      <line x1="2" y1="2" x2="22" y2="22"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="regConfirmPassword" class="form-label">Confirm Password *</label>
+                <div class="password-input-wrapper">
+                  <input type="password" id="regConfirmPassword" class="form-control" placeholder="Repeat password" required minlength="8" maxlength="100" autocomplete="new-password">
+                  <button type="button" class="btn-toggle-password" id="toggleRegConfirmPassword" aria-label="Show password" title="Show password" data-target="regConfirmPassword">
+                    <svg class="eye-icon eye-icon-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <svg class="eye-icon eye-icon-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+                      <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+                      <line x1="2" y1="2" x2="22" y2="22"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="registerFeedback" style="display: none; padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1rem; font-size: 0.85rem;"></div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;" id="registerSubmitBtn">
+              Register Student Account
+            </button>
+          </form>
+        </div>
+
+        <div style="text-align: center; margin-top: 1.75rem; font-size: 0.92rem; color: var(--text-muted);">
+          Already have an account? 
+          <a href="login.html" style="color: var(--primary); font-weight: 600;" id="toLoginLink">
+            Sign in instead &rarr;
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="nav-brand" style="margin-bottom: 0.85rem;">
+            <div class="brand-icon"><span>🔍</span></div>
+            <span>CampusFind</span>
+          </div>
+          <p style="max-width: 340px; line-height: 1.5; color: var(--text-dim);">
+            Intelligent campus lost & found management system featuring OpenCLIP vision transformers for automated image similarity matching.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Navigation</div>
+          <ul class="footer-links">
+            <li><a href="browse.html">Browse Catalog</a></li>
+            <li><a href="create-report.html?type=LOST">Report Lost Item</a></li>
+            <li><a href="create-report.html?type=FOUND">Report Found Item</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <ul class="footer-links">
+            <li><a href="about.html">OpenCLIP Architecture</a></li>
+            <li><a href="/api/v1/health" target="_blank">Backend Health API</a></li>
+            <li><a href="login.html">Staff & Student Portal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Campus Security</div>
+          <ul class="footer-links">
+            <li><span style="color: var(--text-dim);">Safety Escort: ext 2200</span></li>
+            <li><span style="color: var(--text-dim);">Central Security Desk: Hall B</span></li>
+            <li><span style="color: var(--text-dim);">Emergency: 911</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 CampusFind AI. Built with Spring Boot & OpenCLIP.</div>
+        <div>ViT-B-32 Neural Embeddings active</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('registerForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const fullName = document.getElementById('regFullName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPassword').value;
+        const confirmPassword = document.getElementById('regConfirmPassword').value;
+        const feedback = document.getElementById('registerFeedback');
+        const submitBtn = document.getElementById('registerSubmitBtn');
+
+        feedback.style.display = 'none';
+
+        if (password !== confirmPassword) {
+          feedback.style.display = 'block';
+          feedback.style.background = 'rgba(239, 68, 68, 0.15)';
+          feedback.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+          feedback.style.color = '#fca5a5';
+          feedback.textContent = 'Passwords do not match.';
+          return;
+        }
+
+        if (password.length < 8) {
+          feedback.style.display = 'block';
+          feedback.style.background = 'rgba(239, 68, 68, 0.15)';
+          feedback.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+          feedback.style.color = '#fca5a5';
+          feedback.textContent = 'Password must be at least 8 characters.';
+          return;
+        }
+
+        try {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Creating account...';
+
+          const user = await auth.register(fullName, email, password);
+          app.showNotification('success', `Welcome to CampusFind, ${user.fullName}! Your student account is active.`);
+
+          setTimeout(() => {
+            window.location.href = 'browse.html';
+          }, 600);
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Register Student Account';
+          feedback.style.display = 'block';
+          feedback.style.background = 'rgba(239, 68, 68, 0.15)';
+          feedback.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+          feedback.style.color = '#fca5a5';
+          feedback.textContent = err.message || 'Registration failed.';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

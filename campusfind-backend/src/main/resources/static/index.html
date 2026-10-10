@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusFind — AI Lost & Found System</title>
+  <meta name="description" content="CampusFind AI: Fast, intelligent campus lost and found powered by OpenCLIP visual AI matching.">
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="nav-brand" id="navBrandLink">
+        <div class="brand-icon"><span>🔍</span></div>
+        <span>CampusFind</span>
+        <span class="brand-badge">AI Core</span>
+      </a>
+
+      <button class="mobile-toggle" id="mobileNavToggle" aria-label="Toggle navigation">☰</button>
+
+      <ul class="nav-links">
+        <li><a href="browse.html" class="nav-link" id="navBrowseLink">📂 Browse Items</a></li>
+        <li><a href="create-report.html?type=LOST" class="nav-link" id="navReportLostLink">📢 Report Lost</a></li>
+        <li><a href="create-report.html?type=FOUND" class="nav-link" id="navReportFoundLink">✨ Report Found</a></li>
+        <li><a href="about.html" class="nav-link" id="navAboutLink">💡 How AI Works</a></li>
+      </ul>
+
+      <div class="nav-actions" id="navActions"></div>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Notification Banner Area -->
+      <div class="flash-container" id="flashNotificationArea"></div>
+
+      <!-- Hero Section -->
+      <section class="hero-section" style="text-align: center; padding: 3.5rem 1rem 3rem;">
+        <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--bg-glass-elevated); border: 1px solid var(--border-glow); padding: 0.4rem 1rem; border-radius: var(--radius-full); margin-bottom: 1.5rem;">
+          <span style="font-size: 0.85rem; color: #c084fc; font-weight: 600;">✨ Powered by OpenCLIP ViT-B-32 Neural Vision</span>
+        </div>
+        <h1 style="font-size: 3.25rem; font-weight: 800; line-height: 1.15; margin-bottom: 1.25rem; letter-spacing: -0.03em;">
+          Reuniting Campus Belongings with <br>
+          <span style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Intelligent Visual AI</span>
+        </h1>
+        <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 650px; margin: 0 auto 2.25rem; line-height: 1.6;">
+          Lost your student ID, backpack, or keys? Submit a report with a photo, and our multimodal AI compares images across campus to rank candidate matches instantly.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="create-report.html?type=LOST" class="btn btn-lg btn-lost" id="heroReportLostBtn">
+            📢 Report a Lost Item
+          </a>
+          <a href="create-report.html?type=FOUND" class="btn btn-lg btn-found" id="heroReportFoundBtn">
+            ✨ Report a Found Item
+          </a>
+          <a href="browse.html" class="btn btn-lg btn-secondary" id="heroBrowseBtn">
+            📂 Browse Catalog
+          </a>
+        </div>
+      </section>
+
+      <!-- Live Campus Metrics Cards -->
+      <section style="margin-bottom: 3.5rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
+          <div class="card" style="padding: 1.5rem; text-align: center;">
+            <div style="font-size: 2.25rem; font-weight: 800; color: #fff;" id="metricTotal">...</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 0.25rem;">
+              Total Reports Indexed
+            </div>
+          </div>
+          <div class="card" style="padding: 1.5rem; text-align: center; border-color: rgba(244, 63, 94, 0.3);">
+            <div style="font-size: 2.25rem; font-weight: 800; color: #fb7185;" id="metricLost">...</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 0.25rem;">
+              Active Lost Items
+            </div>
+          </div>
+          <div class="card" style="padding: 1.5rem; text-align: center; border-color: rgba(16, 185, 129, 0.3);">
+            <div style="font-size: 2.25rem; font-weight: 800; color: #34d399;" id="metricFound">...</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 0.25rem;">
+              Active Found Items
+            </div>
+          </div>
+          <div class="card" style="padding: 1.5rem; text-align: center; border-color: rgba(59, 130, 246, 0.3);">
+            <div style="font-size: 2.25rem; font-weight: 800; color: #60a5fa;" id="metricResolved">...</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 0.25rem;">
+              Resolved Belongings
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- System Health Diagnostics Bar -->
+      <section style="margin-bottom: 3.5rem;">
+        <div class="card" style="padding: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981;" id="healthIndicator"></div>
+            <div>
+              <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">System & AI Engine Status</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);" id="healthStatusText">Connecting to backend APIs...</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.75rem;">
+            <a href="about.html" class="btn btn-sm btn-outline">Architecture Details</a>
+            <a href="/api/v1/health" target="_blank" class="btn btn-sm btn-secondary">Raw Health JSON</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Feature Highlights -->
+      <section style="margin-bottom: 3rem;">
+        <div class="section-header" style="text-align: center; margin-bottom: 2rem;">
+          <div>
+            <h2 class="section-title">How CampusFind AI Works</h2>
+            <p class="section-desc">Streamlining campus property management with neural vision and secure role-based access.</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+          <div class="card" style="padding: 1.75rem;">
+            <div style="font-size: 2rem; margin-bottom: 0.75rem;">📸</div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">1. Report with a Photo</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+              Submit your lost or found item details with an image. The system stores the record and transmits visual features safely.
+            </p>
+          </div>
+
+          <div class="card" style="padding: 1.75rem;">
+            <div style="font-size: 2rem; margin-bottom: 0.75rem;">🧠</div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">2. OpenCLIP Embeddings</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+              The Python AI microservice extracts a 512-dimensional normalized vector using the OpenAI ViT-B-32 model.
+            </p>
+          </div>
+
+          <div class="card" style="padding: 1.75rem;">
+            <div style="font-size: 2rem; margin-bottom: 0.75rem;">🎯</div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">3. Candidate Similarity Ranking</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+              The Java backend queries active opposing reports, ranks them by cosine similarity, and displays candidate matches with match percentages.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="nav-brand" style="margin-bottom: 0.85rem;">
+            <div class="brand-icon"><span>🔍</span></div>
+            <span>CampusFind</span>
+          </div>
+          <p style="max-width: 340px; line-height: 1.5; color: var(--text-dim);">
+            Intelligent campus lost & found management system featuring OpenCLIP vision transformers for automated image similarity matching.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Navigation</div>
+          <ul class="footer-links">
+            <li><a href="browse.html">Browse Catalog</a></li>
+            <li><a href="create-report.html?type=LOST">Report Lost Item</a></li>
+            <li><a href="create-report.html?type=FOUND">Report Found Item</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <ul class="footer-links">
+            <li><a href="about.html">OpenCLIP Architecture</a></li>
+            <li><a href="/api/v1/health" target="_blank">Backend Health API</a></li>
+            <li><a href="login.html">Staff & Student Portal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Campus Security</div>
+          <ul class="footer-links">
+            <li><span style="color: var(--text-dim);">Safety Escort: ext 2200</span></li>
+            <li><span style="color: var(--text-dim);">Central Security Desk: Hall B</span></li>
+            <li><span style="color: var(--text-dim);">Emergency: 911</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 CampusFind AI. Built with Spring Boot & OpenCLIP.</div>
+        <div>ViT-B-32 Neural Embeddings active</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Fetch system health
+      try {
+        const health = await api.checkHealth();
+        const indicator = document.getElementById('healthIndicator');
+        const text = document.getElementById('healthStatusText');
+        if (health && health.status === 'UP') {
+          indicator.style.background = '#10b981';
+          const dbDesc = health.database && health.database.isAivenCloud ? 'Aiven Cloud MySQL' : (health.database?.databaseProductName || 'Database');
+          text.textContent = `Spring Boot Core: UP (${dbDesc} Active) • Java 21 • Ready`;
+        } else {
+          indicator.style.background = '#f59e0b';
+          text.textContent = 'Backend reporting degraded status.';
+        }
+      } catch (e) {
+        const indicator = document.getElementById('healthIndicator');
+        const text = document.getElementById('healthStatusText');
+        if (indicator) indicator.style.background = '#ef4444';
+        if (text) text.textContent = 'Backend service offline or unreachable.';
+      }
+
+      // 2. Fetch report metrics if authenticated
+      if (auth.isAuthenticated()) {
+        try {
+          const reports = await api.getReports();
+          const total = reports.length;
+          const lost = reports.filter(r => r.type === 'LOST' && r.status === 'OPEN').length;
+          const found = reports.filter(r => r.type === 'FOUND' && r.status === 'OPEN').length;
+          const resolved = reports.filter(r => r.status === 'RESOLVED').length;
+
+          document.getElementById('metricTotal').textContent = total;
+          document.getElementById('metricLost').textContent = lost;
+          document.getElementById('metricFound').textContent = found;
+          document.getElementById('metricResolved').textContent = resolved;
+        } catch (e) {
+          // Keep neutral placeholders if not able to load
+          document.getElementById('metricTotal').textContent = '—';
+          document.getElementById('metricLost').textContent = '—';
+          document.getElementById('metricFound').textContent = '—';
+          document.getElementById('metricResolved').textContent = '—';
+        }
+      } else {
+        document.getElementById('metricTotal').textContent = '—';
+        document.getElementById('metricLost').textContent = '—';
+        document.getElementById('metricFound').textContent = '—';
+        document.getElementById('metricResolved').textContent = '—';
+      }
+    });
+  </script>
+</body>
+</html>
