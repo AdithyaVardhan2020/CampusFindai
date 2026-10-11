@@ -12,8 +12,8 @@
  * 5. Console utility: Call setBackendUrl('https://<your-render-name>.onrender.com/api/v1')
  */
 (function() {
-  // Default Render production backend endpoint (replace with your exact Render service name if different)
-  const RENDER_BACKEND_URL = 'https://campusfind-backend.onrender.com/api/v1';
+  // Default Render production backend endpoint (connected to live Render service)
+  const RENDER_BACKEND_URL = 'https://campusfind-backend-wary.onrender.com/api/v1';
 
   let resolvedApiBaseUrl = '/api/v1';
 

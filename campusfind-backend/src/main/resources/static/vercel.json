@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/api/v1/:path*",
-      "destination": "https://campusfind-backend.onrender.com/api/v1/:path*"
+      "destination": "https://campusfind-backend-wary.onrender.com/api/v1/:path*"
     }
   ]
 }

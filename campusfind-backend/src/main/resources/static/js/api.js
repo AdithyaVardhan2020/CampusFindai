@@ -16,7 +16,8 @@ const api = {
       ...options.headers
     };
 
-    if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    if (options.body && typeof options.body === 'object' && !isFormData) {
       headers['Content-Type'] = 'application/json';
       options.body = JSON.stringify(options.body);
     }
@@ -146,6 +147,11 @@ const api = {
 
   getAdminReports() {
     return this.get('/admin/reports');
+  },
+
+  // Chatbot API
+  sendChatMessage(message, history = []) {
+    return this.post('/chatbot/message', { message, history });
   }
 };
 

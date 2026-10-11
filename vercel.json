@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/v1/:path*",
-      "destination": "https://campusfind-backend.onrender.com/api/v1/:path*"
+      "destination": "https://campusfind-backend-wary.onrender.com/api/v1/:path*"
     },
     { "source": "/", "destination": "/campusfind-backend/src/main/resources/static/index.html" },
     { "source": "/css/(.*)", "destination": "/campusfind-backend/src/main/resources/static/css/$1" },

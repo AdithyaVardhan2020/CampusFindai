@@ -23,6 +23,7 @@ describe('CampusFind Frontend Unit Tests', () => {
       btoa: (str) => Buffer.from(str, 'binary').toString('base64'),
       atob: (b64) => Buffer.from(b64, 'base64').toString('binary'),
       URLSearchParams: URLSearchParams,
+      FormData: class FormData {},
       AbortController: AbortController,
       setTimeout: setTimeout,
       clearTimeout: clearTimeout,
@@ -113,5 +114,45 @@ describe('CampusFind Frontend Unit Tests', () => {
     assert.equal(capturedHeaders['Authorization'], 'Basic c3R1ZGVudDpwYXNz');
     assert.equal(reports.length, 1);
     assert.equal(reports[0].title, 'Lost Keys');
+  });
+
+  test('config.js automatically routes to live Render backend on Vercel domain', () => {
+    const vercelContext = {
+      window: {
+        location: { hostname: 'campusfind-demo.vercel.app' }
+      },
+      sessionStorage: { getItem: () => null },
+      localStorage: { getItem: () => null },
+      console: console
+    };
+    vercelContext.window.location = { hostname: 'campusfind-demo.vercel.app' };
+
+    const staticJsDir = path.resolve('src/main/resources/static/js');
+    const configCode = fs.readFileSync(path.join(staticJsDir, 'config.js'), 'utf8');
+    vm.runInNewContext(configCode, vercelContext);
+
+    assert.equal(vercelContext.window.CAMPUSFIND_CONFIG.apiBaseUrl, 'https://campusfind-backend-wary.onrender.com/api/v1');
+  });
+
+  test('api.sendChatMessage routes through api.baseUrl and sends message body', async () => {
+    const api = context.window.api;
+    let capturedUrl = '';
+    let capturedBody = null;
+
+    context.fetch = async (url, options) => {
+      capturedUrl = url;
+      capturedBody = JSON.parse(options.body);
+      return {
+        ok: true,
+        status: 200,
+        headers: new Map([['content-type', 'application/json']]),
+        json: async () => ({ reply: 'Hello! I can help you find lost items.' })
+      };
+    };
+
+    const res = await api.sendChatMessage('Where is my bag?', []);
+    assert.ok(capturedUrl.endsWith('/chatbot/message'));
+    assert.equal(capturedBody.message, 'Where is my bag?');
+    assert.equal(res.reply, 'Hello! I can help you find lost items.');
   });
 });

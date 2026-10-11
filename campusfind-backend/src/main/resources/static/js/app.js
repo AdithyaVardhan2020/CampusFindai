@@ -9,6 +9,17 @@ const app = {
     this.setupGlobalFlashClose();
     this.setupPasswordToggles();
     this.setupChatbot();
+    this.setupDynamicApiLinks();
+  },
+
+  setupDynamicApiLinks() {
+    const config = window.CAMPUSFIND_CONFIG;
+    if (config && config.apiBaseUrl && config.apiBaseUrl.startsWith('http')) {
+      document.querySelectorAll('a[href^="/api/v1"]').forEach(link => {
+        const path = link.getAttribute('href').replace(/^\/api\/v1/, '');
+        link.href = `${config.apiBaseUrl}${path}`;
+      });
+    }
   },
 
   setupNavbar() {
@@ -386,24 +397,7 @@ const app = {
       scrollToBottom();
 
       try {
-        const response = await fetch('/api/v1/chatbot/message', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            message: text,
-            history: history
-          })
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.message || `Request failed (status ${response.status})`);
-        }
-
-        const data = await response.json();
+        const data = await window.api.sendChatMessage(text, history);
         const reply = data.reply || "I didn't receive a response. Please try again.";
         appendMessage('assistant', reply);
 

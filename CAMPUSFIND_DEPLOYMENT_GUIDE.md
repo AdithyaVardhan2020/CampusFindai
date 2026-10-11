@@ -107,10 +107,10 @@ Click **Create Web Service** (or **Save Changes**). Render will now build the Do
 
 Once the Render build completes and status changes to **Live**:
 
-1. Note your Render service public URL (e.g., `https://campusfind-backend.onrender.com`).
+1. Note your Render service public URL (e.g., `https://campusfind-backend-wary.onrender.com`).
 2. Test the core health endpoint in your browser or via curl:
    ```bash
-   curl -s https://campusfind-backend.onrender.com/api/v1/health
+   curl -s https://campusfind-backend-wary.onrender.com/api/v1/health
    ```
    *Expected Response:*
    ```json
@@ -125,7 +125,7 @@ Once the Render build completes and status changes to **Live**:
    ```
 3. Test the in-process AI health endpoint:
    ```bash
-   curl -s https://campusfind-backend.onrender.com/api/v1/reports/ai-health
+   curl -s https://campusfind-backend-wary.onrender.com/api/v1/reports/ai-health
    ```
    *Expected Response:*
    ```json
@@ -164,11 +164,11 @@ Once the Render build completes and status changes to **Live**:
 > Static HTML/JS frontends on Vercel do **not** automatically expose Vercel environment variables to browser JavaScript. CampusFind AI handles this reliably through multiple complementary mechanisms:
 
 1. **Automatic Domain Routing**:
-   [`config.js`](file:///D:/CampusFindai/campusfind-backend/src/main/resources/static/js/config.js) checks `window.location.hostname`. When loaded on `*.vercel.app`, it routes requests to `https://campusfind-backend.onrender.com/api/v1`. If your Render service has a custom name, edit the `RENDER_BACKEND_URL` constant at the top of `config.js`.
+   [`config.js`](file:///D:/CampusFindai/campusfind-backend/src/main/resources/static/js/config.js) checks `window.location.hostname`. When loaded on `*.vercel.app`, it routes requests to `https://campusfind-backend-wary.onrender.com/api/v1`. If your Render service has a custom name, edit the `RENDER_BACKEND_URL` constant at the top of `config.js`.
 2. **Vercel Reverse Proxy Rewrites**:
    Both [`vercel.json`](file:///D:/CampusFindai/vercel.json) files configure a reverse proxy rewrite:
    ```json
-   { "source": "/api/v1/:path*", "destination": "https://campusfind-backend.onrender.com/api/v1/:path*" }
+   { "source": "/api/v1/:path*", "destination": "https://campusfind-backend-wary.onrender.com/api/v1/:path*" }
    ```
    This allows the browser to communicate same-origin with `/api/v1`, transparently forwarded to Render at the edge.
 3. **Instant Browser Console Override**:
