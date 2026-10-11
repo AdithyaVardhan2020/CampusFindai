@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/api/v1/:path*",
+      "destination": "https://campusfind-backend.onrender.com/api/v1/:path*"
+    },
+    { "source": "/", "destination": "/campusfind-backend/src/main/resources/static/index.html" },
+    { "source": "/css/(.*)", "destination": "/campusfind-backend/src/main/resources/static/css/$1" },
+    { "source": "/js/(.*)", "destination": "/campusfind-backend/src/main/resources/static/js/$1" },
+    { "source": "/images/(.*)", "destination": "/campusfind-backend/src/main/resources/static/images/$1" },
+    { "source": "/favicon.ico", "destination": "/campusfind-backend/src/main/resources/static/favicon.ico" },
+    { "source": "/(.*)", "destination": "/campusfind-backend/src/main/resources/static/$1" }
+  ]
+}

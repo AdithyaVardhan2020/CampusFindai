@@ -1,0 +1,11 @@
+target/
+.mvn/
+*.cmd
+data/
+*.mv.db
+*.trace.db
+aiven-env.ps1
+application-aiven.properties
+.git
+.github
+HELP.md

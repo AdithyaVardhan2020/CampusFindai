@@ -5,6 +5,7 @@ import com.campusfind.exception.AiServiceUnavailableException;
 import com.campusfind.exception.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -23,15 +24,29 @@ public class AiServiceClient {
     private static final Logger log = LoggerFactory.getLogger(AiServiceClient.class);
 
     private final RestClient aiRestClient;
+    private final LocalOnnxEmbeddingService localOnnxService;
+
+    @Autowired
+    public AiServiceClient(
+            @Qualifier("aiRestClient") RestClient aiRestClient,
+            @Autowired(required = false) LocalOnnxEmbeddingService localOnnxService
+    ) {
+        this.aiRestClient = aiRestClient;
+        this.localOnnxService = localOnnxService;
+    }
 
     public AiServiceClient(@Qualifier("aiRestClient") RestClient aiRestClient) {
-        this.aiRestClient = aiRestClient;
+        this(aiRestClient, null);
     }
 
     /**
-     * Checks health and readiness of the OpenCLIP Python AI service.
+     * Checks health and readiness of the AI service (prioritizing in-process ONNX engine).
      */
     public AiHealthResponse checkHealth() {
+        if (localOnnxService != null && localOnnxService.isAvailable()) {
+            return localOnnxService.getHealth();
+        }
+
         try {
             AiHealthResponse response = aiRestClient.get()
                     .uri("/api/v1/ai/health")
@@ -43,7 +58,7 @@ public class AiServiceClient {
                 return response;
             }
         } catch (Exception ex) {
-            log.warn("AI service unreachable during health check: {}", ex.getMessage());
+            log.warn("Remote AI service unreachable during health check: {}", ex.getMessage());
         }
 
         return new AiHealthResponse(
@@ -62,6 +77,10 @@ public class AiServiceClient {
     public List<Double> generateEmbeddingFromBase64(String imageBase64) {
         if (imageBase64 == null || imageBase64.isBlank()) {
             throw new BadRequestException("Image base64 content cannot be empty.");
+        }
+
+        if (localOnnxService != null && localOnnxService.isAvailable()) {
+            return localOnnxService.generateEmbeddingFromBase64(imageBase64);
         }
 
         String rawBase64 = imageBase64.trim();
@@ -109,6 +128,10 @@ public class AiServiceClient {
             throw new BadRequestException("Both embeddings are required for similarity calculation.");
         }
 
+        if (localOnnxService != null && localOnnxService.isAvailable()) {
+            return localOnnxService.calculateSimilarity(embedding1, embedding2);
+        }
+
         try {
             AiSimilarityRequest request = new AiSimilarityRequest(embedding1, embedding2);
             return aiRestClient.post()
@@ -136,6 +159,10 @@ public class AiServiceClient {
     public AiRankResponse rankCandidates(List<Double> targetEmbedding, List<AiCandidateDto> candidates, double threshold, int limit) {
         if (targetEmbedding == null || targetEmbedding.isEmpty() || candidates == null || candidates.isEmpty()) {
             return new AiRankResponse(0, Collections.emptyList());
+        }
+
+        if (localOnnxService != null && localOnnxService.isAvailable()) {
+            return localOnnxService.rankCandidates(targetEmbedding, candidates, threshold, limit);
         }
 
         try {

@@ -27,17 +27,29 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private static final List<String> DEFAULT_DEV_ORIGINS = List.of(
+            "http://localhost:8080",
+            "http://127.0.0.1:8080",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:5000",
+            "http://127.0.0.1:5000"
+    );
+
     private final CustomUserDetailsService userDetailsService;
 
-    @Value("${campusfind.cors.allowed-origins:http://localhost:5000,http://127.0.0.1:5000,http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080}")
+    @Value("${campusfind.cors.allowed-origins:https://*.vercel.app}")
     private String allowedOrigins;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService) {
@@ -64,11 +76,17 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        List<String> origins = Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .toList();
-        configuration.setAllowedOrigins(origins);
+
+        // Always preserve local development origins while merging exact or pattern production origins
+        Set<String> mergedOrigins = new LinkedHashSet<>(DEFAULT_DEV_ORIGINS);
+        if (allowedOrigins != null && !allowedOrigins.isBlank()) {
+            Arrays.stream(allowedOrigins.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .forEach(mergedOrigins::add);
+        }
+
+        configuration.setAllowedOriginPatterns(new ArrayList<>(mergedOrigins));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With", "Origin"));
         configuration.setExposedHeaders(List.of("Authorization"));

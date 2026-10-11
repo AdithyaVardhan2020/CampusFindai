@@ -1,0 +1,56 @@
+services:
+  # ----------------------------------------------------------------------------
+  # Single Unified Spring Boot Web Service with Embedded ONNX AI Matching
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: campusfind-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: master
+    rootDir: campusfind-backend
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health
+    envVars:
+      # Database connection (Aiven Cloud MySQL)
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+        value: com.mysql.cj.jdbc.Driver
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: validate
+
+      # Embedded ONNX AI Engine Configuration
+      - key: CAMPUSFIND_AI_ONNX_ENABLED
+        value: "true"
+      - key: CAMPUSFIND_AI_MODEL_PATH
+        value: /app/models/openclip_vit_b32_int8.onnx
+      - key: CAMPUSFIND_AI_CONCURRENCY_LIMIT
+        value: "3"
+
+      # Production CORS (Allows Vercel Frontend and Local Testing)
+      - key: CAMPUSFIND_CORS_ALLOWED_ORIGINS
+        value: https://*.vercel.app,http://localhost:8080
+
+      # Groq AI Help Chatbot
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL_ID
+        value: llama-3.1-8b-instant
+      - key: GROQ_API_URL
+        value: https://api.groq.com/openai/v1/chat/completions
+
+      # System Administrator Provisioning
+      - key: CAMPUSFIND_ADMIN_EMAIL
+        sync: false
+      - key: CAMPUSFIND_ADMIN_PASSWORD
+        sync: false
+      - key: CAMPUSFIND_ADMIN_NAME
+        value: Campus Administrator
+      - key: CAMPUSFIND_ADMIN_RESET_PASSWORD
+        value: "false"
