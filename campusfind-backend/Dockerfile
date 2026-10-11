@@ -45,5 +45,5 @@ EXPOSE 8080
 # - Xms128m -Xmx256m: Restricts Java heap to 256 MB max, leaving ~250 MB for ONNX native allocations and Metaspace
 # - Xss512k: Reduces thread stack size from default 1MB
 # - MaxMetaspaceSize=128m: Bounds class metadata footprint
-# - ExitOnOutOfMemoryError: Triggers immediate container restart if memory ceiling is ever breached
-ENTRYPOINT ["sh", "-c", "java -XX:+UseContainerSupport -Xms128m -Xmx256m -Xss512k -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -XX:+ExitOnOutOfMemoryError -Dserver.port=${PORT:-8080} -jar app.jar"]
+# - server.address=0.0.0.0 and preferIPv4Stack=true: Guarantees Tomcat binds to 0.0.0.0 on IPv4
+ENTRYPOINT ["sh", "-c", "java -XX:+UseContainerSupport -Xms128m -Xmx256m -Xss512k -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -XX:+ExitOnOutOfMemoryError -Dserver.port=${PORT:-8080} -Dserver.address=0.0.0.0 -Djava.net.preferIPv4Stack=true -jar app.jar"]
