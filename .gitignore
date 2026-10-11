@@ -71,3 +71,15 @@ campusfind-backend/target/
 .env.*
 !.env.example
 
+# Local tools and experiments
+.python-version
+experiments/
+
+# Local diagnostic and verification scratchpads
+CAMPUSFIND_AIVEN_LIVE_VERIFICATION_REPORT.md
+CAMPUSFIND_AI_OPTIMIZATION_REPORT.md
+CAMPUSFIND_COMPLETE_DIAGNOSTIC_REPORT.md
+CAMPUSFIND_DEPLOYMENT_BLOCKERS.md
+CAMPUSFIND_FINAL_BLOCKER_RESOLUTION.md
+CAMPUSFIND_FREE_DEPLOYMENT_ANALYSIS.md
+
