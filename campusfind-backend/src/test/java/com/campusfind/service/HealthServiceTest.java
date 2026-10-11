@@ -10,6 +10,9 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import java.sql.DatabaseMetaData;
+import java.sql.Statement;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -68,5 +71,53 @@ class HealthServiceTest {
         assertThat(response.status()).isEqualTo("DOWN");
         assertThat(response.database().status()).isEqualTo("DOWN");
         assertThat(response.database().message()).isEqualTo("Database connection failed validity check.");
+    }
+
+    @Test
+    @DisplayName("HealthService init does not crash startup if database is temporarily unavailable")
+    void testInitDoesNotThrowWhenDatabaseUnavailableAtStartup() throws Exception {
+        DataSource mockDataSource = mock(DataSource.class);
+        when(mockDataSource.getConnection()).thenThrow(new SQLException("Connection refused / timeout"));
+
+        HealthService service = new HealthService(mockDataSource);
+        // init() must handle exception gracefully and not throw
+        service.init();
+
+        HealthResponse response = service.checkHealth();
+        assertThat(response.status()).isEqualTo("DOWN");
+    }
+
+    @Test
+    @DisplayName("HealthService recovers from temporary database delays once connection succeeds")
+    void testRecoveryFromTemporaryConnectionDelay() throws Exception {
+        DataSource mockDataSource = mock(DataSource.class);
+        Connection mockConnection = mock(Connection.class);
+        Statement mockStatement = mock(Statement.class);
+        DatabaseMetaData mockMetaData = mock(DatabaseMetaData.class);
+
+        when(mockConnection.isValid(3)).thenReturn(true);
+        when(mockConnection.createStatement()).thenReturn(mockStatement);
+        when(mockConnection.getMetaData()).thenReturn(mockMetaData);
+        when(mockMetaData.getDatabaseProductName()).thenReturn("MySQL");
+        when(mockMetaData.getDatabaseProductVersion()).thenReturn("8.4.8");
+        when(mockMetaData.getDriverName()).thenReturn("MySQL Connector/J");
+        when(mockMetaData.getURL()).thenReturn("jdbc:mysql://mysql-c9bf15d.aivencloud.com:11859/defaultdb");
+
+        // First call fails with timeout/delay, second call succeeds
+        when(mockDataSource.getConnection())
+                .thenThrow(new SQLException("Communications link failure: The driver has not received any packets from the server"))
+                .thenReturn(mockConnection);
+
+        HealthService resilientService = new HealthService(mockDataSource);
+
+        // 1. Initial attempt fails
+        HealthResponse firstResponse = resilientService.checkHealth();
+        assertThat(firstResponse.status()).isEqualTo("DOWN");
+
+        // 2. Subsequent attempt recovers immediately to UP
+        HealthResponse recoveredResponse = resilientService.checkHealth();
+        assertThat(recoveredResponse.status()).isEqualTo("UP");
+        assertThat(recoveredResponse.database().isAivenCloud()).isTrue();
+        assertThat(recoveredResponse.database().databaseProductName()).isEqualTo("MySQL");
     }
 }

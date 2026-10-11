@@ -4,6 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 
+const testDir = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'));
+const staticJsDir = fs.existsSync(path.resolve('src/main/resources/static/js'))
+  ? path.resolve('src/main/resources/static/js')
+  : path.resolve(testDir, '../../main/resources/static/js');
+
 describe('CampusFind Frontend Unit Tests', () => {
   let context;
 
@@ -37,7 +42,6 @@ describe('CampusFind Frontend Unit Tests', () => {
     context.window = context;
 
     // Load config.js, auth.js, api.js, app.js into context
-    const staticJsDir = path.resolve('src/main/resources/static/js');
     ['config.js', 'auth.js', 'api.js', 'app.js'].forEach(file => {
       const code = fs.readFileSync(path.join(staticJsDir, file), 'utf8');
       vm.runInNewContext(code, context);
@@ -127,7 +131,6 @@ describe('CampusFind Frontend Unit Tests', () => {
     };
     vercelContext.window.location = { hostname: 'campusfind-demo.vercel.app' };
 
-    const staticJsDir = path.resolve('src/main/resources/static/js');
     const configCode = fs.readFileSync(path.join(staticJsDir, 'config.js'), 'utf8');
     vm.runInNewContext(configCode, vercelContext);
 
