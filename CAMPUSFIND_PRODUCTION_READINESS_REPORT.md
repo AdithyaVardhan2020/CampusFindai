@@ -261,7 +261,7 @@ Benchmarked using warm in-process ONNX Runtime session on 224×224 test images:
    - Default wildcards (`*`) with credentials were rejected.
    - Configured origin patterns restrict access to `http://localhost:*` for development and `https://*.vercel.app` for Vercel production hosting.
 3. **Container Hardening**:
-   - Docker container runs under non-privileged user `appuser` (UID 1000).
+   - Docker container runs under non-privileged user `appuser`.
    - Sensitive actuator/h2 endpoints disabled or restricted.
 4. **Input Sanitization**:
    - Base64 images are checked for maximum payload length (15 MB string / 10 MB raw) to prevent denial-of-service memory pressure.

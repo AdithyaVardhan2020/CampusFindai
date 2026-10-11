@@ -20,8 +20,11 @@ RUN mvn clean package -DskipTests -B
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
-# Run as non-root user for container security
-RUN useradd -m -u 1000 appuser
+# Run as non-root user for container security (allocates next available UID/GID, avoiding UID 1000 collision)
+RUN if ! id -u appuser >/dev/null 2>&1; then \
+        groupadd appuser 2>/dev/null || groupadd -r appuser 2>/dev/null || true; \
+        useradd -m -g appuser -s /bin/sh appuser 2>/dev/null || useradd -m -s /bin/sh appuser; \
+    fi && chown -R appuser:appuser /app
 
 # Copy bundled ONNX INT8 visual encoder model (~91.6 MB)
 COPY --chown=appuser:appuser models/ /app/models/
