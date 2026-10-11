@@ -42,12 +42,16 @@ public class HealthService {
      */
     @PostConstruct
     public void init() {
-        try {
-            logger.info("Pre-warming database health check and metadata cache...");
-            checkHealthLive();
-        } catch (Exception ex) {
-            logger.warn("Initial database health check pre-warm encountered an issue (will retry on demand): {}", ex.getMessage());
-        }
+        Thread prewarmThread = new Thread(() -> {
+            try {
+                logger.info("Pre-warming database health check and metadata cache in background...");
+                checkHealthLive();
+            } catch (Exception ex) {
+                logger.warn("Initial database health check pre-warm encountered an issue (will retry on demand): {}", ex.getMessage());
+            }
+        }, "health-prewarm");
+        prewarmThread.setDaemon(true);
+        prewarmThread.start();
     }
 
     /**
